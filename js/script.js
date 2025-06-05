@@ -49,7 +49,7 @@ function updateContent(lang) {
 
       // Buttons
       [
-        ["map", t?.map?.text ?? "mapl", t?.map?.class ?? "default-btn"],
+        ["map", t?.map?.text ?? "map", t?.map?.class ?? "default-btn"],
         [
           "tutorial",
           t?.tutorial?.text ?? "Tutorial",
