@@ -24,9 +24,9 @@ body::before {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  z-index: -1; /* Hintergrund liegt hinter dem Inhalt */
-  pointer-events: none; /* Klicks gehen durch */
-  filter: brightness(0.4) grayscale(20%); /* Abdunkeln und leicht entsättigen */
+  z-index: -1;
+  pointer-events: none;
+  filter: brightness(0.4) grayscale(20%);
 }
 
 /* Overlay für die Sprachwahl (Modal-Dialog) */
@@ -38,8 +38,8 @@ body::before {
   bottom: 0;
   background: #232323;
   display: flex;
-  align-items: center; /* Zentriert Modal-Inhalt vertikal */
-  justify-content: center; /* Zentriert Modal-Inhalt horizontal */
+  align-items: center;
+  justify-content: center;
   z-index: 1000;
   padding: 1em;
 }
@@ -56,7 +56,7 @@ body::before {
   max-width: 350px;
 }
 
-/* Versteckt ein Element komplett (z.B. das Modal) */
+/* Versteckt ein Element*/
 .hidden {
   display: none !important;
 }
@@ -100,9 +100,9 @@ body::before {
 
 /* Container für die beiden Haupt-Buttons: nebeneinander mit Abstand */
 .button-row {
-  display: flex; /* Flexbox für nebeneinander */
-  justify-content: center; /* Zentriert Buttons horizontal */
-  gap: 1em; /* Abstand zwischen den Buttons */
+  display: flex;
+  justify-content: center;
+  gap: 1em;
   margin: 1em auto;
   max-width: 350px;
   width: 90vw;
@@ -110,12 +110,12 @@ body::before {
 
 /* Styling für die beiden Haupt-Buttons */
 .button-row button {
-  flex: 1 1 0; /* Beide Buttons gleich breit */
+  flex: 1 1 0;
   width: auto;
   max-width: none;
   margin: 0;
   display: block;
-  background: #00883a; /* Grüner Button */
+  background: #00883a;
   color: white;
   padding: 1em 2em;
   border: none;
@@ -153,8 +153,8 @@ body::before {
 
 .main-image {
   display: block;
-  width: 2000px; /* Originalbreite deines Bildes */
-  height: 1200px; /* Originalhöhe deines Bildes */
+  width: 1854px;
+  height: 911px;
   max-width: none;
   max-height: none;
   user-select: none;
@@ -181,24 +181,8 @@ body::before {
   transition: background 0.2s, box-shadow 0.2s;
   z-index: 10;
 }
-.marker:hover,
-.marker:focus {
-  background: rgba(255, 100, 100, 1);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
-  outline: none;
-}
 
-/* Optional: Schöne Scrollbar */
-.scroll-container::-webkit-scrollbar {
-  width: 12px;
-  background: #333;
-}
-.scroll-container::-webkit-scrollbar-thumb {
-  background: #555;
-  border-radius: 6px;
-}
-
-/* Responsive Anpassungen für kleine Bildschirme (z.B. Smartphones) */
+/* Responsive Anpassungen für kleine Bildschirme*/
 @media (max-width: 600px) {
   body {
     font-size: 1em;
@@ -213,7 +197,7 @@ body::before {
     margin-top: 60px;
   }
   .button-row {
-    flex-direction: column; /* Buttons untereinander statt nebeneinander */
+    flex-direction: column;
     gap: 0.7em;
     max-width: 95vw;
     width: 95vw;

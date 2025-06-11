@@ -31,11 +31,9 @@ window.onload = function () {
 function updateContent(lang) {
   const cacheBuster = Date.now();
   fetch(`lang/${lang}.json?cb=${cacheBuster}`)
-    .then((response) => {
-      return response.json();
-    })
+    .then((response) => response.json())
     .then((t) => {
-      // Texte
+      // Texte setzen
       [
         ["title", t?.title ?? ""],
         ["description", t?.description ?? ""],
@@ -47,9 +45,9 @@ function updateContent(lang) {
         if (el) el.textContent = text;
       });
 
-      // Buttons
+      // Buttons setzen
       [
-        ["map", t?.map?.text ?? "map", t?.map?.class ?? "default-btn"],
+        ["map", t?.map?.text ?? "mapl", t?.map?.class ?? "default-btn"],
         [
           "tutorial",
           t?.tutorial?.text ?? "Tutorial",
