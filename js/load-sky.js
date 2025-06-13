@@ -25,7 +25,7 @@ AFRAME.registerComponent("load-sky", {
     this.waypointEls = [];
     this.assetsEl = this.el.querySelector("a-assets");
     this.infoPanelEl = this.el.querySelector("#infoPanel");
-    this.backgroundEl = this.el.querySelector("#background");
+    this.cancelBubbleEl = this.el.querySelector("#cancelBubble");
     this.fadeBackgroundEl = this.el.querySelector("#fadeBackground");
 
     this.objectTitleEl = this.infoPanelEl.querySelector("#objectTitle");
@@ -61,11 +61,12 @@ AFRAME.registerComponent("load-sky", {
       this.onWaypointClick = this.onWaypointClick.bind(this);
       for (var i = 0; i < this.waypointEls.length; ++i) {
         this.waypointEls[i].addEventListener("click", this.onWaypointClick);
+        console.log("listener added to waypoint");
       }
     });
 
-    this.onBackgroundClick = this.onBackgroundClick.bind(this);
-    this.backgroundEl.addEventListener("click", this.onBackgroundClick);
+    this.onCancelBubbleClick = this.onCancelBubbleClick.bind(this);
+    this.cancelBubbleEl.addEventListener("click", this.onCancelBubbleClick);
 
     this.infoPanelEl.object3D.renderOrder = 2;
     this.infoPanelEl.object3D.depthTest = false;
@@ -118,10 +119,12 @@ AFRAME.registerComponent("load-sky", {
   onWaypointClick: function (evt) {
     var objectId = evt.currentTarget.id;
 
+    console.log(`${objectId} was just clicked!`);
+
     this.objectInfoPromise.then((skyObjects) => {
       var objectInfo = skyObjects[objectId];
 
-      this.backgroundEl.object3D.scale.set(1, 1, 1);
+      this.cancelBubbleEl.object3D.scale.set(1, 1, 1);
 
       this.infoPanelEl.object3D.scale.set(3e-3, 3e-3, 3e-3);
       if (AFRAME.utils.device.isMobile()) {
@@ -143,8 +146,8 @@ AFRAME.registerComponent("load-sky", {
     });
   },
 
-  onBackgroundClick: function (evt) {
-    this.backgroundEl.object3D.scale.set(0.001, 0.001, 0.001);
+  onCancelBubbleClick: function (evt) {
+    this.cancelBubbleEl.object3D.scale.set(0.001, 0.001, 0.001);
     this.infoPanelEl.object3D.scale.set(1e-5, 1e-5, 1e-5);
     this.infoPanelEl.object3D.visible = false;
     this.fadeBackgroundEl.object3D.visible = false;
