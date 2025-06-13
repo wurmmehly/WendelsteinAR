@@ -41,13 +41,13 @@
         <!-- "material > src" soll von dem Element selbst übergeschrieben werden -->
         <a-mixin
           id="infoPanelImage"
-          geometry="primitive: plane; width: 1.5; height: 0.81"
+          geometry="primitive: plane; width: 1.3; height: 0.81"
           material="src: #objectImage; shader: flat; transparent: true"
           position="0 0.495 0.002"
         ></a-mixin>
       </a-assets>
 
-      <!-- Beim Click auf dieses Element wird das "infoPanel" geschlossen -->
+      <!-- Beim Klick auf dieses Element wird das "infoPanel" geschlossen -->
       <!-- das wird von onWaypointClick in js/load-sky.js vergrössert, nur wenn Information angezeigt wird. -->
       <a-entity
         id="cancelBubble"
@@ -82,30 +82,29 @@
           position="0 0 -0.01"
           visible="false"
           scale="0.001 0.001 0.001"
-          geometry="primitive: plane; width: 1.5; height: 1.8"
+          geometry="primitive: plane; width: 1.3; height: 1.8"
           material="color: #333333; shader: flat; transparent: false"
-          class="raycastable"
         >
           <!-- NOTIZ: Diese Schriftarten (Viga regular & roboto) zeigt die Zeichnen ä, ü, ö, und ß nicht richtig an.
                     Die erste 3 zeigt wie a, u, und o an, und der ß zeigt ganz nicht an. Ich bin nicht ganz sicher,
                     wie eine bessere Schriftart benutzt werden kann -->
           <a-entity
             id="objectTitle"
-            position="-0.68 -0.1 0"
+            position="-0.6 -0.1 0"
             text="shader: msdf; anchor: left; width: 1.5; font: https://cdn.aframe.io/examples/ui/Viga-Regular.json; color: white; value: Unbekanntes Objekt"
           >
           </a-entity>
           <!-- Defaultwert; soll aktuelisiert werden, wenn man auf ein Objekt klickt -->
           <a-entity
             id="objectDescription"
-            position="-0.6 -0.2 0"
+            position="-0.55 -0.2 0"
             text="
               baseline: top;
               shader: msdf;
               anchor: left;
               font: roboto;
               color: white;
-              width: 1.2;
+              width: 1.1;
               wrapCount: 50;
               value: Keine Beschreibung."
           ></a-entity>
