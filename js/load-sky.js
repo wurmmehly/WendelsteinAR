@@ -61,7 +61,6 @@ AFRAME.registerComponent("load-sky", {
       this.onWaypointClick = this.onWaypointClick.bind(this);
       for (var i = 0; i < this.waypointEls.length; ++i) {
         this.waypointEls[i].addEventListener("click", this.onWaypointClick);
-        console.log("listener added to waypoint");
       }
     });
 
