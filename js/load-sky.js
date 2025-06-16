@@ -5,16 +5,21 @@ const WENDELSTEIN = {
   altitude: 1838,
 };
 
+// Entfernungen soll als Meter sein
+const dist2lat = 0.000008910573484511227;
+const dist2lon = 0.00001334858798736137;
+
 // az und alt sollen beide als dezimalle Grade sein
 // r ist der Radius der himmlische Kugel
-// TODO: some trouble here bc azimuth measures as east from north while A-Frame uses a right-handed coordinate system. must think on this
-function azalt2xyz(az, alt, r) {
+function azalt2lonlatalt(az, alt, r) {
   azRad = az * DEGREE2RAD;
   altRad = alt * DEGREE2RAD;
+
+  cosalt = Math.cos(altRad);
   return {
-    x: r * Math.sin(azRad),
-    y: r * Math.sin(altRad),
-    z: r * Math.cos(azRad),
+    deltaLon: r * Math.cos(azRad) * cosalt * dist2lon,
+    deltaLat: r * Math.sin(azRad) * cosalt * dist2lat,
+    deltaAlt: r * Math.sin(altRad),
   };
 }
 
@@ -52,9 +57,13 @@ AFRAME.registerComponent("load-sky", {
         });
 
         var relCoords = observation.azel(new Date());
-        var xyzCoords = azalt2xyz(relCoords.azimuth, relCoords.elevation, 100);
+        var deltaCoords = azalt2lonlatalt(
+          relCoords.azimuth,
+          relCoords.elevation,
+          100
+        );
 
-        this.addWaypoint(objectId, xyzCoords);
+        this.addWaypoint(objectId, deltaCoords);
       }
 
       // hört zu, wenn Waypoints geklickt werden
@@ -89,7 +98,15 @@ AFRAME.registerComponent("load-sky", {
     var waypointEl = document.createElement("a-entity");
 
     waypointEl.setAttribute("id", objectId);
-    waypointEl.setAttribute("position", position);
+    waypointEl.setAttribute("position", {
+      x: 0,
+      y: WENDELSTEIN.altitude + position.deltaAlt,
+      z: 0,
+    });
+    waypointEl.setAttribute("gps-projected-entity-place", {
+      latitude: WENDELSTEIN.latitude + position.deltaLat,
+      longitude: WENDELSTEIN.longitude + position.deltaLon,
+    });
     waypointEl.setAttribute("mixin", "frame");
     waypointEl.setAttribute("class", "raycastable waypoint");
     waypointEl.setAttribute("look-at", "#camera");
