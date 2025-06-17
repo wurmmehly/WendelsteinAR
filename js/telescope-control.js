@@ -1,7 +1,13 @@
 const RAD2DEG = 180 / Math.PI;
+
 const MIN_ALT = 20;
 const MAX_ALT = 90;
+
+// wie schnell das Teleskop dreht, wenn es selbst bewegt
 const TELESCOPE_NATURAL_SPEED = 1;
+
+// wie schnell das Teleskop dreht, wenn man es bewegt
+const EASING = 1;
 
 function modulateRotation(degrees) {
   const initiallyNeg = degrees < 0;
@@ -19,6 +25,10 @@ function modulateRotation(degrees) {
   return degrees;
 }
 
+function signOf(num) {
+  return num < 0 ? -1 : 1;
+}
+
 AFRAME.registerComponent("telescope-control", {
   init: function () {
     this.raycaster = this.el.components["raycaster"];
@@ -30,8 +40,7 @@ AFRAME.registerComponent("telescope-control", {
     this.currentRay = { alt: 0, az: 0 };
     this.previousRay = { alt: 0, az: 0 };
 
-    this.wasActive = false;
-    this.active = false;
+    this.active = this.wasActive = false;
 
     this.el.addEventListener("mousedown", (evt) => {
       this.active = true;
@@ -40,7 +49,6 @@ AFRAME.registerComponent("telescope-control", {
       this.active = this.wasActive = false;
     });
 
-    this.waypointsLoaded = false;
     this.el.addEventListener("skyloaded", (evt) => {
       this.waypointCoords = evt.detail.waypointCoords;
     });
@@ -53,32 +61,9 @@ AFRAME.registerComponent("telescope-control", {
     if (isNaN(this.currentTelescope.alt) || isNaN(this.currentRay.alt)) return;
 
     if (this.active) {
-      if (this.wasActive) {
-        this.updateTelescopeAltitude(
-          this.currentRay.alt - this.previousRay.alt
-        );
-        this.updateTelescopeAzimuth(this.currentRay.az - this.previousRay.az);
-      }
-
-      this.previousRay = this.currentRay;
-      this.wasActive = true;
+      this.controlTelescope();
     } else if (this.waypointCoords) {
-      const closestWaypoint = this.getClosestWaypoint();
-
-      var deltaAlt = closestWaypoint.coords.alt - this.currentTelescope.alt;
-      const altSign = deltaAlt > 1 ? 1 : -1;
-      if (Math.abs(deltaAlt) > TELESCOPE_NATURAL_SPEED) {
-        deltaAlt = altSign * TELESCOPE_NATURAL_SPEED;
-      }
-
-      var deltaAz = closestWaypoint.coords.az - this.currentTelescope.az;
-      const azSign = deltaAz > 1 ? 1 : -1;
-      if (Math.abs(deltaAz) > TELESCOPE_NATURAL_SPEED) {
-        deltaAz = azSign * TELESCOPE_NATURAL_SPEED;
-      }
-
-      this.updateTelescopeAltitude(deltaAlt);
-      this.updateTelescopeAzimuth(deltaAz);
+      this.moveTelescopeToClosestWaypoint();
     }
   },
 
@@ -127,21 +112,56 @@ AFRAME.registerComponent("telescope-control", {
     });
   },
 
+  controlTelescope: function () {
+    if (this.wasActive) {
+      this.updateTelescopeAltitude(
+        (this.currentRay.alt - this.previousRay.alt) * EASING
+      );
+      this.updateTelescopeAzimuth(
+        (this.currentRay.az - this.previousRay.az) * EASING
+      );
+    }
+
+    this.previousRay = this.currentRay;
+    this.wasActive = true;
+  },
+
+  moveTelescopeToClosestWaypoint: function () {
+    const closestWaypoint = this.getClosestWaypoint();
+    if (closestWaypoint === null) return;
+
+    deltaAlt =
+      signOf(closestWaypoint.deltaAlt) *
+      min(Math.abs(closestWaypoint.deltaAlt), TELESCOPE_NATURAL_SPEED);
+
+    deltaAz =
+      signOf(closestWaypoint.deltaAz) *
+      min(Math.abs(closestWaypoint.deltaAz), TELESCOPE_NATURAL_SPEED);
+
+    this.updateTelescopeAltitude(deltaAlt);
+    this.updateTelescopeAzimuth(deltaAz);
+  },
+
   getClosestWaypoint: function () {
-    closestWaypoint = { name: "placeholder", coords: { alt: 1000, az: 1000 } };
+    closestWaypoint = null;
     closestDistance = 1000;
 
     for (const [objectId, coords] of Object.entries(this.waypointCoords)) {
       if (coords.alt < MIN_ALT) continue;
 
+      deltaAlt = this.currentTelescope.alt - coords.alt;
       deltaAz = this.currentTelescope.az - coords.az;
       if (deltaAz > 180) deltaAz = 180 - deltaAz;
 
-      distance =
-        ((this.currentTelescope.alt - coords.alt) ** 2 + deltaAz ** 2) ** 0.5;
+      distance = (deltaAlt ** 2 + deltaAz ** 2) ** 0.5;
 
       if (distance < closestDistance) {
-        closestWaypoint = { objectId: objectId, coords: coords };
+        closestWaypoint = {
+          objectId: objectId,
+          coords: coords,
+          deltaAlt: deltaAlt,
+          deltaAz: deltaAz,
+        };
         closestDistance = distance;
       }
     }
