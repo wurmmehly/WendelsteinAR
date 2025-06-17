@@ -5,21 +5,19 @@ const WENDELSTEIN = {
   altitude: 1838,
 };
 
-// Entfernungen soll als Meter sein
-const dist2lat = 0.000008910573484511227;
-const dist2lon = 0.00001334858798736137;
-
 // az und alt sollen beide als dezimalle Grade sein
 // r ist der Radius der himmlische Kugel
-function azalt2lonlatalt(az, alt, r) {
+function azalt2xyz(az, alt, r) {
   azRad = az * DEGREE2RAD;
   altRad = alt * DEGREE2RAD;
 
+  console.log(r * Math.sin(altRad));
+
   cosalt = Math.cos(altRad);
   return {
-    deltaLon: r * Math.cos(azRad) * cosalt * dist2lon,
-    deltaLat: r * Math.sin(azRad) * cosalt * dist2lat,
-    deltaAlt: r * Math.sin(altRad),
+    x: r * Math.sin(azRad) * cosalt,
+    y: r * Math.sin(altRad),
+    z: -r * Math.cos(azRad) * cosalt,
   };
 }
 
@@ -28,6 +26,8 @@ AFRAME.registerComponent("load-sky", {
     let lang = localStorage.getItem("language");
 
     this.waypointEls = [];
+    this.waypointCoords = {};
+    this.camera = this.el.querySelector("a-camera");
     this.assetsEl = this.el.querySelector("a-assets");
     this.infoPanelEl = this.el.querySelector("#infoPanel");
     this.cancelBubbleEl = this.el.querySelector("#cancelBubble");
@@ -36,6 +36,10 @@ AFRAME.registerComponent("load-sky", {
     this.objectTitleEl = this.infoPanelEl.querySelector("#objectTitle");
     this.objectDescriptionEl =
       this.infoPanelEl.querySelector("#objectDescription");
+
+    this.telescopePosition = this.el
+      .querySelector("#fraunhoferRig")
+      .getAttribute("position");
 
     this.objectCoordsPromise = fetch("resources/coordinates.json").then(
       (response) => response.json()
@@ -57,14 +61,25 @@ AFRAME.registerComponent("load-sky", {
         });
 
         var relCoords = observation.azel(new Date());
-        var deltaCoords = azalt2lonlatalt(
-          relCoords.azimuth,
-          relCoords.elevation,
-          100
-        );
 
-        this.addWaypoint(objectId, deltaCoords);
+        alt = relCoords.elevation;
+        az =
+          relCoords.azimuth > 180 ? 180 - relCoords.azimuth : relCoords.azimuth;
+
+        var xyzCoords = azalt2xyz(az, alt, 100);
+
+        this.addWaypoint(objectId, xyzCoords);
+        this.waypointCoords[objectId] = {
+          alt: alt,
+          az: az,
+        };
       }
+
+      this.camera.emit(
+        "skyloaded",
+        { waypointCoords: this.waypointCoords },
+        false
+      );
 
       // hört zu, wenn Waypoints geklickt werden
       this.onWaypointClick = this.onWaypointClick.bind(this);
@@ -99,13 +114,9 @@ AFRAME.registerComponent("load-sky", {
 
     waypointEl.setAttribute("id", objectId);
     waypointEl.setAttribute("position", {
-      x: 0,
-      y: WENDELSTEIN.altitude + position.deltaAlt,
-      z: 0,
-    });
-    waypointEl.setAttribute("gps-projected-entity-place", {
-      latitude: WENDELSTEIN.latitude + position.deltaLat,
-      longitude: WENDELSTEIN.longitude + position.deltaLon,
+      x: this.telescopePosition.x + position.x,
+      y: position.y,
+      z: this.telescopePosition.z + position.z,
     });
     waypointEl.setAttribute("mixin", "frame");
     waypointEl.setAttribute("class", "raycastable waypoint");
@@ -134,8 +145,6 @@ AFRAME.registerComponent("load-sky", {
 
   onWaypointClick: function (evt) {
     var objectId = evt.currentTarget.id;
-
-    console.log(`${objectId} was just clicked!`);
 
     this.objectInfoPromise.then((skyObjects) => {
       var objectInfo = skyObjects[objectId];

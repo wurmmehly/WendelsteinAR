@@ -10,6 +10,7 @@
     <script src="https://cdn.jsdelivr.net/gh/lizard-isana/orb.js@v2.4/build/min/orb-core.v2.min.js"></script>
     <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
     <script src="js/load-sky.js"></script>
+    <script src="js/telescope-control.js"></script>
   </head>
 
   <body style="margin: 0; overflow: hidden">
@@ -67,16 +68,17 @@
         gps-projected-camera
         cursor="rayOrigin: mouse"
         raycaster="objects: #cancelBubble"
+        telescope-control
         rotation="0 0 0"
       >
         <!-- Dieses Cursor zeigt das Info-Panel an, wenn man etwas für 1.5 Sekunden ansieht -->
-        <a-cursor
+        <!-- <a-cursor
           fuse="true"
           objects=".raycastable"
           raycaster="showLine: true"
           geometry="primitive: plane; width: 2e-2; height: 2e-2"
           material="src: #cursorStar"
-        ></a-cursor>
+        ></a-cursor> -->
 
         <!-- Den Hintergrund verdunkeln, während Information gezeigt wird -->
         <a-entity
@@ -124,9 +126,8 @@
       <!-- Modell an GPS-Koordinaten -->
       <a-entity
         id="fraunhoferRig"
-        scale="0.1 0.1 0.1"
+        scale=".1 .1 .1"
         gps-projected-entity-place="latitude: 47.703563; longitude: 12.012455"
-        rotation="0 180 0"
       >
         <a-entity
           id="fraunhoferPedestal"
@@ -135,19 +136,30 @@
           <a-entity
             id="fraunhoferTopPart"
             gltf-model="models/fraunhofer/topPart.glb"
-            rotation="0 -45 0"
+            rotation="0 0 0"
           >
             <!-- "Rig" benötigt, um das Teleskop richtig zu drehen (um die richtige Achse) -->
             <a-entity
               id="fraunhoferTelescopeRig"
               position="0 32.09 0"
-              rotation="10 0 0"
+              rotation="90 0 0"
             >
               <a-entity
                 id="fraunhoferTelescope"
                 gltf-model="models/fraunhofer/telescope.glb"
                 position="0 -32.09 0"
-              ></a-entity>
+              >
+                <a-cone
+                  id="fraunhoferBeam"
+                  color="#f0ff72"
+                  opacity=".2"
+                  position="0 32.09 -500"
+                  rotation="-90 0 0"
+                  height="1000"
+                  radius-bottom=".5"
+                  radius-top="90"
+                ></a-cone>
+              </a-entity>
             </a-entity>
           </a-entity>
         </a-entity>
