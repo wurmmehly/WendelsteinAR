@@ -131,8 +131,6 @@ AFRAME.registerComponent("telescope-control", {
     closestWaypoint = { name: "placeholder", coords: { alt: 1000, az: 1000 } };
     closestDistance = 1000;
 
-    console.log(this.waypointCoords);
-
     for (const [objectId, coords] of Object.entries(this.waypointCoords)) {
       if (coords.alt < MIN_ALT) continue;
 
@@ -142,15 +140,12 @@ AFRAME.registerComponent("telescope-control", {
       distance =
         ((this.currentTelescope.alt - coords.alt) ** 2 + deltaAz ** 2) ** 0.5;
 
-      console.log(`${objectId}: ${distance}`);
-
       if (distance < closestDistance) {
         closestWaypoint = { objectId: objectId, coords: coords };
         closestDistance = distance;
       }
     }
 
-    console.log(closestWaypoint);
     return closestWaypoint;
   },
 });

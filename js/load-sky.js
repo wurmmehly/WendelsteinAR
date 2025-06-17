@@ -11,8 +11,6 @@ function azalt2xyz(az, alt, r) {
   azRad = az * DEGREE2RAD;
   altRad = alt * DEGREE2RAD;
 
-  console.log(r * Math.sin(altRad));
-
   cosalt = Math.cos(altRad);
   return {
     x: r * Math.sin(azRad) * cosalt,
