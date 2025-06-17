@@ -113,7 +113,7 @@ AFRAME.registerComponent("load-sky", {
     waypointEl.setAttribute("id", objectId);
     waypointEl.setAttribute("position", {
       x: this.telescopePosition.x + position.x,
-      y: position.y,
+      y: 3.209 + position.y,
       z: this.telescopePosition.z + position.z,
     });
     waypointEl.setAttribute("mixin", "waypointFrame");
