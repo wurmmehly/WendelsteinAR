@@ -137,7 +137,7 @@ AFRAME.registerComponent("telescope-control", {
       if (coords.alt < MIN_ALT) continue;
 
       deltaAz = this.currentTelescope.az - coords.az;
-      if (deltaAz > 180) deltaAz -= 180;
+      if (deltaAz > 180) deltaAz = 180 - deltaAz;
 
       distance =
         ((this.currentTelescope.alt - coords.alt) ** 2 + deltaAz ** 2) ** 0.5;
