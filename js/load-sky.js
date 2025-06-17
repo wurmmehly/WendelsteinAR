@@ -1,7 +1,7 @@
 const DEGREE2RAD = Math.PI / 180;
 const WENDELSTEIN = {
-  latitude: 47.7038888889,
-  longitude: 12.0124166667,
+  latitude: 48.1299327,
+  longitude: 11.5647978,
   altitude: 1838,
 };
 
@@ -118,13 +118,13 @@ AFRAME.registerComponent("load-sky", {
       y: position.y,
       z: this.telescopePosition.z + position.z,
     });
-    waypointEl.setAttribute("mixin", "frame");
+    waypointEl.setAttribute("mixin", "waypointFrame");
     waypointEl.setAttribute("class", "raycastable waypoint");
     waypointEl.setAttribute("look-at", "#camera");
 
     var waypointChildEl = document.createElement("a-entity");
     waypointChildEl.setAttribute("material", `src: #${objectId}Image`);
-    waypointChildEl.setAttribute("mixin", "poster");
+    waypointChildEl.setAttribute("mixin", "waypointImage");
 
     waypointEl.appendChild(waypointChildEl);
 

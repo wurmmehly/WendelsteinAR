@@ -23,15 +23,15 @@
     >
       <a-assets>
         <a-mixin
-          id="frame"
-          geometry="primitive: plane; width: 10; height: 10"
+          id="waypointFrame"
+          geometry="primitive: circle; radius: 5"
           material="color: white; shader: flat"
           animation__scale="property: scale; to: 1.2 1.2 1.2; dur: 200; startEvents: raycaster-intersected"
           animation__scale_reverse="property: scale; to: 1 1 1; dur: 200; startEvents: raycaster-intersected-cleared"
         ></a-mixin>
         <a-mixin
-          id="poster"
-          geometry="primitive: plane; width: 9.5; height: 9.5"
+          id="waypointImage"
+          geometry="primitive: circle; radius: 4.9"
           material="color: white; shader: flat"
           material="shader: flat"
           position="0 0 0.005"
