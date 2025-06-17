@@ -22,8 +22,6 @@
       load-sky
     >
       <a-assets>
-        <img id="cursorStar" src="resources/star-cursor.svg" />
-
         <a-mixin
           id="frame"
           geometry="primitive: plane; width: 10; height: 10"
@@ -71,15 +69,6 @@
         telescope-control
         rotation="0 0 0"
       >
-        <!-- Dieses Cursor zeigt das Info-Panel an, wenn man etwas für 1.5 Sekunden ansieht -->
-        <!-- <a-cursor
-          fuse="true"
-          objects=".raycastable"
-          raycaster="showLine: true"
-          geometry="primitive: plane; width: 2e-2; height: 2e-2"
-          material="src: #cursorStar"
-        ></a-cursor> -->
-
         <!-- Den Hintergrund verdunkeln, während Information gezeigt wird -->
         <a-entity
           id="fadeBackground"
