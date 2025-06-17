@@ -29,6 +29,10 @@ function signOf(num) {
   return num < 0 ? -1 : 1;
 }
 
+function capSpeed(delta, max = null) {
+  return (max !== null && Math.abs(delta) > max) ? signOf(delta) * max : delta;
+}
+
 AFRAME.registerComponent("telescope-control", {
   init: function () {
     this.raycaster = this.el.components["raycaster"];
@@ -47,10 +51,12 @@ AFRAME.registerComponent("telescope-control", {
     });
     this.el.addEventListener("mouseup", (evt) => {
       this.active = this.wasActive = false;
+      this.closestWaypoint = this.getClosestWaypoint();
     });
 
     this.el.addEventListener("skyloaded", (evt) => {
       this.waypointCoords = evt.detail.waypointCoords;
+      this.closestWaypoint = this.getClosestWaypoint();
     });
   },
 
@@ -62,7 +68,7 @@ AFRAME.registerComponent("telescope-control", {
 
     if (this.active) {
       this.controlTelescope();
-    } else if (this.waypointCoords) {
+    } else if (this.closestWaypoint) {
       this.moveTelescopeToClosestWaypoint();
     }
   },
@@ -86,7 +92,9 @@ AFRAME.registerComponent("telescope-control", {
     };
   },
 
-  updateTelescopeAltitude: function (delta) {
+  updateTelescopeAltitude: function (delta, max = null) {
+    delta = capSpeed(delta, max);
+
     var newTelescopeAlt = this.currentTelescope.alt + delta;
 
     if (newTelescopeAlt < MIN_ALT) {
@@ -102,7 +110,9 @@ AFRAME.registerComponent("telescope-control", {
     });
   },
 
-  updateTelescopeAzimuth: function (delta) {
+  updateTelescopeAzimuth: function (delta, max = null) {
+    delta = capSpeed(delta, max)
+
     var newTelescopeAz = modulateRotation(-(this.currentTelescope.az + delta));
 
     this.fraunhoferTopPart.setAttribute("rotation", {
@@ -127,19 +137,15 @@ AFRAME.registerComponent("telescope-control", {
   },
 
   moveTelescopeToClosestWaypoint: function () {
-    const closestWaypoint = this.getClosestWaypoint();
-    if (closestWaypoint === null) return;
+    deltaAlt = modulateRotation(
+      this.closestWaypoint.alt - this.currentTelescope.alt
+    );
+    deltaAz = modulateRotation(
+      this.closestWaypoint.az - this.currentTelescope.az
+    );
 
-    deltaAlt =
-      signOf(closestWaypoint.deltaAlt) *
-      min(Math.abs(closestWaypoint.deltaAlt), TELESCOPE_NATURAL_SPEED);
-
-    deltaAz =
-      signOf(closestWaypoint.deltaAz) *
-      min(Math.abs(closestWaypoint.deltaAz), TELESCOPE_NATURAL_SPEED);
-
-    this.updateTelescopeAltitude(deltaAlt);
-    this.updateTelescopeAzimuth(deltaAz);
+    this.updateTelescopeAltitude(deltaAlt, TELESCOPE_NATURAL_SPEED);
+    this.updateTelescopeAzimuth(deltaAz, TELESCOPE_NATURAL_SPEED);
   },
 
   getClosestWaypoint: function () {
@@ -149,18 +155,16 @@ AFRAME.registerComponent("telescope-control", {
     for (const [objectId, coords] of Object.entries(this.waypointCoords)) {
       if (coords.alt < MIN_ALT) continue;
 
-      deltaAlt = this.currentTelescope.alt - coords.alt;
-      deltaAz = this.currentTelescope.az - coords.az;
-      if (deltaAz > 180) deltaAz = 180 - deltaAz;
+      deltaAlt = modulateRotation(coords.alt - this.currentTelescope.alt);
+      deltaAz = modulateRotation(coords.az - this.currentTelescope.az);
 
       distance = (deltaAlt ** 2 + deltaAz ** 2) ** 0.5;
 
       if (distance < closestDistance) {
         closestWaypoint = {
           objectId: objectId,
-          coords: coords,
-          deltaAlt: deltaAlt,
-          deltaAz: deltaAz,
+          alt: coords.alt,
+          az: coords.az,
         };
         closestDistance = distance;
       }
