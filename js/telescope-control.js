@@ -3,6 +3,9 @@ const RAD2DEG = 180 / Math.PI;
 const MIN_ALT = 20;
 const MAX_ALT = 90;
 
+// wenn delta weniger als diesen Nummer ist, wird die Bewegung verworfen
+const TINY_DELTA = 7.2e-15;
+
 // wie schnell das Teleskop dreht, wenn es selbst bewegt
 const TELESCOPE_NATURAL_SPEED = 1;
 
@@ -30,14 +33,15 @@ function signOf(num) {
 }
 
 function capSpeed(delta, max = null) {
-  return (max !== null && Math.abs(delta) > max) ? signOf(delta) * max : delta;
+  if (max !== null && Math.abs(delta) > max) delta = signOf(delta) * max;
+  return delta;
 }
 
 AFRAME.registerComponent("telescope-control", {
   init: () => {
     this.raycaster = this.el.components["raycaster"];
     this.fraunhoferTopPart = document.querySelector("#fraunhoferTopPart");
-    this.fraunhoferTelescopeRig = document.querySelector(
+    this.fraunhoferTelescopeRig = this.fraunhoferTopPart.querySelector(
       "#fraunhoferTelescopeRig"
     );
 
@@ -93,6 +97,8 @@ AFRAME.registerComponent("telescope-control", {
   },
 
   updateTelescopeAltitude: (delta, max = null) => {
+    if (Math.abs(delta) < TINY_DELTA) return;
+
     delta = capSpeed(delta, max);
 
     var newTelescopeAlt = this.currentTelescope.alt + delta;
@@ -111,6 +117,8 @@ AFRAME.registerComponent("telescope-control", {
   },
 
   updateTelescopeAzimuth: (delta, max = null) => {
+    if (Math.abs(delta) < TINY_DELTA) return;
+
     delta = capSpeed(delta, max);
 
     var newTelescopeAz = modulateRotation(-(this.currentTelescope.az + delta));
