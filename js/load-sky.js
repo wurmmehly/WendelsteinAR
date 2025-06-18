@@ -20,7 +20,7 @@ function azalt2xyz(az, alt, r) {
 }
 
 AFRAME.registerComponent("load-sky", {
-  init: () => {
+  init: function () {
     let lang = localStorage.getItem("language");
 
     this.waypointEls = [];
@@ -109,7 +109,7 @@ AFRAME.registerComponent("load-sky", {
     this.fadeBackgroundEl.getObject3D("mesh").material.depthTest = false;
   },
 
-  loadImage: (objectId) => {
+  loadImage: function (objectId) {
     var imgAssetEl = document.createElement("img");
 
     imgAssetEl.setAttribute("id", `${objectId}Image`);
@@ -120,7 +120,7 @@ AFRAME.registerComponent("load-sky", {
   },
 
   // Fügt ein "waypoint" an der Position im Himmel hinzu
-  addWaypoint: (objectId, position) => {
+  addWaypoint: function (objectId, position) {
     var waypointEl = document.createElement("a-entity");
 
     waypointEl.setAttribute("id", objectId);
@@ -152,7 +152,7 @@ AFRAME.registerComponent("load-sky", {
     this.el.append(waypointEl);
   },
 
-  createInfoHologram: (objectId, title, desc) => {
+  createInfoHologram: function (objectId, title, desc) {
     infoHologramEl = document.createElement("a-entity");
     infoHologramEl.setAttribute("id", `${objectId}HologramPanel`);
     infoHologramEl.setAttribute("mixin", "hologramPanel");
@@ -172,7 +172,7 @@ AFRAME.registerComponent("load-sky", {
     return infoHologramEl;
   },
 
-  addInfoPanelImage: (objectId) => {
+  addInfoPanelImage: function (objectId) {
     var infoPanelImageEl = document.createElement("a-entity");
 
     infoPanelImageEl.setAttribute("id", `${objectId}InfoPanelImage`);
@@ -203,7 +203,7 @@ AFRAME.registerComponent("load-sky", {
     this.fraunhoferBeam.setAttribute("radius-top", 50);
   },
 
-  onCancelBubbleClick: (evt) => {
+  onCancelBubbleClick: function (evt) {
     this.cancelBubbleEl.object3D.scale.set(0.001, 0.001, 0.001);
     this.infoPanelEl.object3D.scale.set(1e-5, 1e-5, 1e-5);
     this.infoPanelEl.object3D.visible = false;
