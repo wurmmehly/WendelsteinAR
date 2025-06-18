@@ -34,7 +34,7 @@ function capSpeed(delta, max = null) {
 }
 
 AFRAME.registerComponent("telescope-control", {
-  init: function () {
+  init: () => {
     this.raycaster = this.el.components["raycaster"];
     this.fraunhoferTopPart = document.querySelector("#fraunhoferTopPart");
     this.fraunhoferTelescopeRig = document.querySelector(
@@ -60,7 +60,7 @@ AFRAME.registerComponent("telescope-control", {
     });
   },
 
-  tick: function () {
+  tick: () => {
     this.currentTelescope = this.getCurrentTelescopeDirection();
     this.currentRay = this.getCurrentRayDirection();
 
@@ -73,7 +73,7 @@ AFRAME.registerComponent("telescope-control", {
     }
   },
 
-  getCurrentRayDirection: function () {
+  getCurrentRayDirection: () => {
     const dirVec = this.raycaster.data.direction;
 
     return {
@@ -85,14 +85,14 @@ AFRAME.registerComponent("telescope-control", {
     };
   },
 
-  getCurrentTelescopeDirection: function () {
+  getCurrentTelescopeDirection: () => {
     return {
       alt: this.fraunhoferTelescopeRig.getAttribute("rotation").x,
       az: -this.fraunhoferTopPart.getAttribute("rotation").y,
     };
   },
 
-  updateTelescopeAltitude: function (delta, max = null) {
+  updateTelescopeAltitude: (delta, max = null) => {
     delta = capSpeed(delta, max);
 
     var newTelescopeAlt = this.currentTelescope.alt + delta;
@@ -110,8 +110,8 @@ AFRAME.registerComponent("telescope-control", {
     });
   },
 
-  updateTelescopeAzimuth: function (delta, max = null) {
-    delta = capSpeed(delta, max)
+  updateTelescopeAzimuth: (delta, max = null) => {
+    delta = capSpeed(delta, max);
 
     var newTelescopeAz = modulateRotation(-(this.currentTelescope.az + delta));
 
@@ -122,7 +122,7 @@ AFRAME.registerComponent("telescope-control", {
     });
   },
 
-  controlTelescope: function () {
+  controlTelescope: () => {
     if (this.wasActive) {
       this.updateTelescopeAltitude(
         (this.currentRay.alt - this.previousRay.alt) * EASING
@@ -136,7 +136,7 @@ AFRAME.registerComponent("telescope-control", {
     this.wasActive = true;
   },
 
-  moveTelescopeToClosestWaypoint: function () {
+  moveTelescopeToClosestWaypoint: () => {
     deltaAlt = modulateRotation(
       this.closestWaypoint.alt - this.currentTelescope.alt
     );
@@ -148,7 +148,7 @@ AFRAME.registerComponent("telescope-control", {
     this.updateTelescopeAzimuth(deltaAz, TELESCOPE_NATURAL_SPEED);
   },
 
-  getClosestWaypoint: function () {
+  getClosestWaypoint: () => {
     closestWaypoint = null;
     closestDistance = 1000;
 
