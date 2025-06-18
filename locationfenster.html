@@ -44,6 +44,40 @@
           material="src: #objectImage; shader: flat; transparent: true"
           position="0 0.495 0.002"
         ></a-mixin>
+
+        <a-mixin
+          id="hologramPanel"
+          geometry="primitive: plane; width: 100; height: 120"
+          material="color: #999999; opacity: .5; transparent: false"
+          scale=".2 .2 .2"
+          position="0 -15 0"
+          visible="false"
+        ></a-mixin>
+        <a-mixin
+          id="hologramTitle"
+          position="0 40 0"
+          text="
+            shader: msdf;
+            baseline: top;
+            align: center;
+            width: 135;
+            font: https://cdn.aframe.io/examples/ui/Viga-Regular.json;
+            color: white;
+            transparent: false"
+        ></a-mixin>
+        <a-mixin
+          id="hologramDesc"
+          position="0 30 0"
+          text="
+            shader: msdf;
+            baseline: top;
+            align: center;
+            font: roboto;
+            color: white;
+            width: 95;
+            wrapCount: 45;
+            transparent: false;"
+        ></a-mixin>
       </a-assets>
 
       <!-- Beim Klick auf dieses Element wird das "infoPanel" geschlossen -->
@@ -137,22 +171,28 @@
                 id="fraunhoferTelescope"
                 gltf-model="models/fraunhofer/telescope.glb"
                 position="0 -32.09 0"
-              >
+              ></a-entity>
+
+              <a-cursor
+                id="fraunhoferRaycaster"
+                raycaster="objects: .waypoint; far: 1e5"
+                fuse="true"
+              ></a-cursor>
+
                 <a-cone
                   id="fraunhoferBeam"
                   color="#f0ff72"
                   opacity=".2"
-                  position="0 32.09 -500"
+                position="0 0 -500"
                   rotation="-90 0 0"
                   height="1000"
                   radius-bottom=".5"
-                  radius-top="90"
+                radius-top="50"
                 ></a-cone>
               </a-entity>
             </a-entity>
           </a-entity>
         </a-entity>
-      </a-entity>
     </a-scene>
   </body>
 </html>
