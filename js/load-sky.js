@@ -1,7 +1,7 @@
 const DEGREE2RAD = Math.PI / 180;
 const WENDELSTEIN = {
-  latitude: 48.1299327,
-  longitude: 11.5647978,
+  latitude: 47.7038888889,
+  longitude: 12.0124166667,
   altitude: 1838,
 };
 
