@@ -27,13 +27,6 @@ AFRAME.registerComponent("load-sky", {
     this.waypointCoords = {};
     this.camera = this.el.querySelector("a-camera");
     this.assetsEl = this.el.querySelector("a-assets");
-    this.infoPanelEl = this.el.querySelector("#infoPanel");
-    this.cancelBubbleEl = this.el.querySelector("#cancelBubble");
-    this.fadeBackgroundEl = this.el.querySelector("#fadeBackground");
-
-    this.objectTitleEl = this.infoPanelEl.querySelector("#objectTitle");
-    this.objectDescriptionEl =
-      this.infoPanelEl.querySelector("#objectDescription");
 
     this.telescopePosition = this.el
       .querySelector("#fraunhoferRig")
@@ -52,8 +45,6 @@ AFRAME.registerComponent("load-sky", {
     this.objectCoordsPromise.then((objectCoords) => {
       for (const [objectId, radecCoords] of Object.entries(objectCoords)) {
         this.loadImage(objectId);
-
-        this.addInfoPanelImage(objectId);
 
         var observation = new Orb.Observation({
           observer: WENDELSTEIN,
@@ -92,21 +83,7 @@ AFRAME.registerComponent("load-sky", {
           this.closeHologramPanel
         );
       }
-
-      var fraunhoferRaycaster = document.querySelector("#fraunhoferRaycaster");
-      fraunhoferRaycaster.addEventListener("raycaster-intersection", (evt) => {
-        console.log(evt);
-      });
     });
-
-    this.onCancelBubbleClick = this.onCancelBubbleClick.bind(this);
-    this.cancelBubbleEl.addEventListener("click", this.onCancelBubbleClick);
-
-    this.infoPanelEl.object3D.renderOrder = 2;
-    this.infoPanelEl.object3D.depthTest = false;
-
-    this.fadeBackgroundEl.object3D.renderOrder = 1;
-    this.fadeBackgroundEl.getObject3D("mesh").material.depthTest = false;
   },
 
   loadImage: function (objectId) {
