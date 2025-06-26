@@ -19,11 +19,21 @@ function azalt2xyz(az, alt, r) {
   };
 }
 
+function animate(element, property, val) {
+  element.setAttribute("animation__scale", {
+    property: property,
+    to: val,
+    dur: 200,
+    easing: "easeInOutQuad",
+  });
+}
+
 AFRAME.registerComponent("load-sky", {
   init: function () {
     let lang = localStorage.getItem("language");
 
     this.waypointEls = [];
+    this.waypointRaycastableEls = [];
     this.waypointCoords = {};
     this.camera = this.el.querySelector("a-camera");
     this.assetsEl = this.el.querySelector("a-assets");
@@ -73,12 +83,19 @@ AFRAME.registerComponent("load-sky", {
       );
 
       // hört zu, wenn Waypoints geklickt werden
-      for (var waypointEl of this.waypointEls) {
-        waypointEl.addEventListener("click", this.openHologramPanel);
-        waypointEl.addEventListener("raycaster-intersected", (evt) => {
-          this.fraunhoferBeam.setAttribute("radius-top", 60);
-        });
-        waypointEl.addEventListener(
+      this.openHologramPanel = this.openHologramPanel.bind(this);
+      this.highlightWaypoint = this.highlightWaypoint.bind(this);
+      this.closeHologramPanel = this.closeHologramPanel.bind(this);
+      for (var waypointRaycastableEl of this.waypointRaycastableEls) {
+        waypointRaycastableEl.addEventListener(
+          "locked-on-waypoint",
+          this.openHologramPanel
+        );
+        waypointRaycastableEl.addEventListener(
+          "raycaster-intersected",
+          this.highlightWaypoint
+        );
+        waypointRaycastableEl.addEventListener(
           "raycaster-intersected-cleared",
           this.closeHologramPanel
         );
@@ -98,19 +115,16 @@ AFRAME.registerComponent("load-sky", {
 
   // Fügt ein "waypoint" an der Position im Himmel hinzu
   addWaypoint: function (objectId, position) {
-    var waypointEl = document.createElement("a-entity");
-
-    waypointEl.setAttribute("id", objectId);
-    waypointEl.setAttribute("position", {
+    absolutePos = {
       x: this.telescopePosition.x + position.x,
       y: 3.209 + position.y,
       z: this.telescopePosition.z + position.z,
-    });
+    };
     waypointEl.setAttribute("mixin", "waypointFrame");
-    waypointEl.setAttribute("class", "raycastable waypoint");
-    waypointEl.setAttribute("look-at", "#camera");
+    waypointEl.setAttribute("class", "waypoint");
 
     var waypointImageEl = document.createElement("a-entity");
+    waypointImageEl.setAttribute("id", `${objectId}WaypointImage`);
     waypointImageEl.setAttribute("material", `src: #${objectId}Image`);
     waypointImageEl.setAttribute("mixin", "waypointImage");
     waypointEl.appendChild(waypointImageEl);
@@ -127,6 +141,14 @@ AFRAME.registerComponent("load-sky", {
 
     this.waypointEls.push(waypointEl);
     this.el.append(waypointEl);
+
+    var waypointRaycastableEl = document.createElement("a-entity");
+    waypointRaycastableEl.setAttribute("id", objectId);
+    waypointRaycastableEl.setAttribute("class", "raycastable");
+    waypointRaycastableEl.setAttribute("mixin", "waypointRaycastable");
+    waypointRaycastableEl.setAttribute("position", absolutePos);
+    this.waypointRaycastableEls.push(waypointRaycastableEl);
+    this.el.append(waypointRaycastableEl);
   },
 
   createInfoHologram: function (objectId, title, desc) {
@@ -160,37 +182,49 @@ AFRAME.registerComponent("load-sky", {
     this.infoPanelEl.append(infoPanelImageEl);
   },
 
-  openHologramPanel: (evt) => {
-    var waypoint = evt.target;
-    var hologramPanel = waypoint.querySelector(`#${waypoint.id}HologramPanel`);
+  openHologramPanel: function (evt) {
+    var waypoint = this.getWaypoint(evt.target.id);
 
-    waypoint.object3D.scale.set(2, 2, 2);
-    hologramPanel.setAttribute("visible", "true");
+    animate(waypoint, "scale", { x: 1.5, y: 1.5, z: 1.5 });
+    waypoint
+      .querySelector(`#${evt.target.id}HologramPanel`)
+      .setAttribute("visible", "true");
 
-    this.fraunhoferBeam.setAttribute("radius-top", 100);
+    // this.fraunhoferBeam.setAttribute("visible", "false");
+    animate(this.fraunhoferBeam, "radius-top", 75);
+
+    this.readMoreContainer.appendChild(this.createReadMoreButton());
   },
 
-  closeHologramPanel: (evt) => {
-    var waypoint = evt.target;
-    var hologramPanel = waypoint.querySelector(`#${waypoint.id}HologramPanel`);
-
-    hologramPanel.setAttribute("visible", "false");
-    waypoint.object3D.scale.set(1, 1, 1);
-
-    this.fraunhoferBeam.setAttribute("radius-top", 50);
+  highlightWaypoint: function (evt) {
+    animate(this.getWaypoint(evt.target.id), "scale", {
+      x: 1.2,
+      y: 1.2,
+      z: 1.2,
+    });
+    animate(this.fraunhoferBeam, "radius-top", 60);
   },
 
-  onCancelBubbleClick: function (evt) {
-    this.cancelBubbleEl.object3D.scale.set(0.001, 0.001, 0.001);
-    this.infoPanelEl.object3D.scale.set(1e-5, 1e-5, 1e-5);
-    this.infoPanelEl.object3D.visible = false;
-    this.fadeBackgroundEl.object3D.visible = false;
+  closeHologramPanel: function (evt) {
+    var waypoint = this.getWaypoint(evt.target.id);
 
-    this.objectTitleEl.setAttribute("text", "value", "Unbekanntes Objekt");
-    this.objectDescriptionEl.setAttribute(
-      "text",
-      "value",
-      "Keine Beschreibung."
-    );
+    waypoint
+      .querySelector(`#${evt.target.id}HologramPanel`)
+      .setAttribute("visible", "false");
+
+    this.fraunhoferBeam.setAttribute("visible", "true");
+    animate(this.fraunhoferBeam, "radius-top", 50);
+
+    animate(waypoint, "scale", { x: 1, y: 1, z: 1 });
+
+    readMoreEl = this.readMoreContainer.querySelector("#readMore");
+    if (readMoreEl) readMoreEl.remove();
+  },
+
+  getWaypoint: function (objectId) {
+    for (const waypoint of this.waypointEls) {
+      if (waypoint.id == objectId + "Waypoint") return waypoint;
+    }
+    return null;
   },
 });

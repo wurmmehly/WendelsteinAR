@@ -26,8 +26,7 @@
           id="waypointFrame"
           geometry="primitive: circle; radius: 5"
           material="color: white; shader: flat"
-          animation__scale="property: scale; to: 1.2 1.2 1.2; dur: 200; startEvents: raycaster-intersected"
-          animation__scale_reverse="property: scale; to: 1 1 1; dur: 200; startEvents: raycaster-intersected-cleared"
+          look-at="#camera"
         ></a-mixin>
         <a-mixin
           id="waypointImage"
@@ -37,6 +36,12 @@
           position="0 0 0.005"
         ></a-mixin>
 
+        <a-mixin
+          id="waypointRaycastable"
+          geometry="primitive: circle; radius: 5"
+          visible="false"
+          look-at="#fraunhoferPedestal"
+        ></a-mixin>
 
         <a-mixin
           id="hologramPanel"
@@ -113,7 +118,7 @@
 
               <a-cursor
                 id="fraunhoferRaycaster"
-                raycaster="objects: .waypoint; far: 1e5"
+                raycaster="objects: .raycastable; far: 1e5"
                 fuse="true"
               ></a-cursor>
 

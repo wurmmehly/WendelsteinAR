@@ -4,7 +4,7 @@ const MIN_ALT = 20;
 const MAX_ALT = 90;
 
 // wenn delta weniger als diesen Nummer ist, wird die Bewegung verworfen
-const TINY_DELTA = 7.2e-15;
+const TINY_DELTA = 1e-6;
 
 // wie schnell das Teleskop dreht, wenn es selbst bewegt
 const TELESCOPE_NATURAL_SPEED = 1;
@@ -49,10 +49,14 @@ AFRAME.registerComponent("telescope-control", {
     this.previousRay = { alt: 0, az: 0 };
 
     this.active = this.wasActive = false;
+    this.lockedOnWaypoint = false;
 
+    // activate
     this.el.addEventListener("mousedown", (evt) => {
       this.active = true;
+      this.lockedOnWaypoint = false;
     });
+    // deactivate
     this.el.addEventListener("mouseup", (evt) => {
       this.active = this.wasActive = false;
       this.closestWaypoint = this.getClosestWaypoint();
@@ -72,7 +76,7 @@ AFRAME.registerComponent("telescope-control", {
 
     if (this.active) {
       this.controlTelescope();
-    } else if (this.closestWaypoint) {
+    } else if (this.closestWaypoint && !this.lockedOnWaypoint) {
       this.moveTelescopeToClosestWaypoint();
     }
   },
@@ -97,8 +101,6 @@ AFRAME.registerComponent("telescope-control", {
   },
 
   updateTelescopeAltitude: function (delta, max = null) {
-    if (Math.abs(delta) < TINY_DELTA) return;
-
     delta = capSpeed(delta, max);
 
     var newTelescopeAlt = this.currentTelescope.alt + delta;
@@ -117,8 +119,6 @@ AFRAME.registerComponent("telescope-control", {
   },
 
   updateTelescopeAzimuth: function (delta, max = null) {
-    if (Math.abs(delta) < TINY_DELTA) return;
-
     delta = capSpeed(delta, max);
 
     var newTelescopeAz = modulateRotation(-(this.currentTelescope.az + delta));
@@ -152,8 +152,13 @@ AFRAME.registerComponent("telescope-control", {
       this.closestWaypoint.az - this.currentTelescope.az
     );
 
+    if (Math.abs(deltaAlt) < TINY_DELTA && Math.abs(deltaAz) < TINY_DELTA) {
+      this.lockedOnWaypoint = true;
+      this.closestWaypoint.el.emit("locked-on-waypoint", {}, false);
+    } else {
     this.updateTelescopeAltitude(deltaAlt, TELESCOPE_NATURAL_SPEED);
     this.updateTelescopeAzimuth(deltaAz, TELESCOPE_NATURAL_SPEED);
+    }
   },
 
   getClosestWaypoint: function () {
@@ -177,6 +182,10 @@ AFRAME.registerComponent("telescope-control", {
         closestDistance = distance;
       }
     }
+
+    closestWaypoint["el"] = document.querySelector(
+      `#${closestWaypoint.objectId}`
+    );
 
     return closestWaypoint;
   },
