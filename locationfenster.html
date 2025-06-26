@@ -11,6 +11,8 @@
     <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
     <script src="js/load-sky.js"></script>
     <script src="js/telescope-control.js"></script>
+
+    <link href="css/locationfenster.css" rel="stylesheet" />
   </head>
 
   <body style="margin: 0; overflow: hidden">
@@ -137,5 +139,8 @@
         </a-entity>
       </a-entity>
     </a-scene>
+
+    <!-- Dies soll am Ende sein; andersweise lädt die <a-scene> über dem overlay -->
+    <div id="overlay" class="overlay"><div id="readMoreContainer"></div></div>
   </body>
 </html>

@@ -66,6 +66,12 @@ AFRAME.registerComponent("telescope-control", {
       this.waypointCoords = evt.detail.waypointCoords;
       this.closestWaypoint = this.getClosestWaypoint();
     });
+
+    this.el.addEventListener("readmore", (evt) => {
+      window.open(
+        `images/objects/original/${this.closestWaypoint.objectId}.jpg`
+      );
+    });
   },
 
   tick: function () {
@@ -156,8 +162,8 @@ AFRAME.registerComponent("telescope-control", {
       this.lockedOnWaypoint = true;
       this.closestWaypoint.el.emit("locked-on-waypoint", {}, false);
     } else {
-    this.updateTelescopeAltitude(deltaAlt, TELESCOPE_NATURAL_SPEED);
-    this.updateTelescopeAzimuth(deltaAz, TELESCOPE_NATURAL_SPEED);
+      this.updateTelescopeAltitude(deltaAlt, TELESCOPE_NATURAL_SPEED);
+      this.updateTelescopeAzimuth(deltaAz, TELESCOPE_NATURAL_SPEED);
     }
   },
 

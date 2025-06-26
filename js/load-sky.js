@@ -19,6 +19,10 @@ function azalt2xyz(az, alt, r) {
   };
 }
 
+function emitReadMoreSignal() {
+  document.querySelector("a-camera").emit("readmore", {}, false);
+}
+
 function animate(element, property, val) {
   element.setAttribute("animation__scale", {
     property: property,
@@ -37,19 +41,25 @@ AFRAME.registerComponent("load-sky", {
     this.waypointCoords = {};
     this.camera = this.el.querySelector("a-camera");
     this.assetsEl = this.el.querySelector("a-assets");
+    this.fraunhoferBeam = this.el.querySelector("#fraunhoferBeam");
 
     this.telescopePosition = this.el
       .querySelector("#fraunhoferRig")
       .getAttribute("position");
 
-    this.fraunhoferBeam = this.el.querySelector("#fraunhoferBeam");
+    this.overlay = document.querySelector("#overlay");
+    this.readMoreContainer = this.overlay.querySelector("#readMoreContainer");
 
     this.objectCoordsPromise = fetch("resources/coordinates.json").then(
       (response) => response.json()
     );
-    this.objectInfoPromise = fetch(`lang/${lang}.json`)
+    this.langDictPromise = fetch(`lang/${lang}.json`)
       .then((response) => response.json())
-      .then((langDict) => langDict.skyObjects);
+      .then((langDict) => langDict);
+
+    this.objectInfoPromise = this.langDictPromise.then(
+      (langDict) => langDict.skyObjects
+    );
 
     // die Bilder laden; "Waypoints" in den Himmel hinzufügen
     this.objectCoordsPromise.then((objectCoords) => {
@@ -180,6 +190,22 @@ AFRAME.registerComponent("load-sky", {
     infoPanelImageEl.setAttribute("visible", "false");
 
     this.infoPanelEl.append(infoPanelImageEl);
+  },
+
+  createReadMoreButton: function () {
+    // <button id="read-more" onclick="emitReadMoreSignal()"></button>
+
+    if (this.overlay.querySelector("#read-more")) return;
+
+    var readMoreEl = document.createElement("button");
+
+    readMoreEl.setAttribute("id", "readMore");
+    readMoreEl.setAttribute("onclick", "emitReadMoreSignal()");
+    this.langDictPromise.then(
+      (langDict) => (readMoreEl.textContent = langDict.readmore)
+    );
+
+    return readMoreEl;
   },
 
   openHologramPanel: function (evt) {

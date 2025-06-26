@@ -1,0 +1,19 @@
+.overlay {
+  z-index: 999999999;
+}
+
+#readMoreContainer {
+  position: fixed;
+  text-align: center;
+  width: 100%;
+}
+
+#readMore {
+  background-color: #33333388;
+  position: fixed;
+  bottom: 2%;
+  color: white;
+  padding: 0.25em;
+  font-size: 16px;
+  border-radius: 25%;
+}
