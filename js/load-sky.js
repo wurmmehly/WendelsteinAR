@@ -25,7 +25,7 @@ function emitReadMoreSignal() {
 }
 
 function animate(element, property, val) {
-  element.setAttribute("animation__scale", {
+  element.setAttribute(`animation__${property}`, {
     property: property,
     to: val,
     dur: 200,
@@ -232,7 +232,6 @@ AFRAME.registerComponent("load-sky", {
         CELESTIAL_SPHERE_RADIUS + 10,
         this.telescopePosition
       );
-      console.log(new_pos);
       animate(otherWaypoint, "position", new_pos);
     }
 
