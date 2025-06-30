@@ -10,21 +10,31 @@
 </head>
 
 <body>
-    <!-- Sprachwahl-Overlay -->
+    <!-- 1. Sprachauswahl-Modal -->
     <div id="language-modal" class="modal">
         <div class="modal-content">
             <h2>Sprache wählen / Choose language</h2>
-            <button class="lang-btn" onclick="setLanguage('de')">🇩🇪 Deutsch</button>
-            <button class="lang-btn" onclick="setLanguage('en')">🇬🇧 English</button>
+            <button class="btn lang-btn" onclick="setLanguage('de')">🇩🇪 Deutsch</button>
+            <button class="btn lang-btn" onclick="setLanguage('en')">🇬🇧 English</button>
         </div>
     </div>
 
-    <!-- Sprachwechsel-Button im Seitenkopf -->
-    <div class="lang-switch">
-        <button class="lang-btn" onclick="showLanguageModal()">🇩🇪/🇬🇧</button>
+    <!-- 2. Weiterleitungs-Modal -->
+    <div id="redirect-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2 id="redirect"></h2>
+            <button id="redirectYesBtn" class="btn redirect-btn-yes" onclick="redirectToIndex()"></button>
+            <button id="redirectNoBtn" class="btn redirect-btn-no" onclick="redirectToOtherPage()"></button>
+        </div>
     </div>
 
-    <!-- Beispiel-Inhalte -->
+
+    <!-- Sprachwechsel-Button -->
+    <div class="lang-switch">
+        <button class="btn lang-btn" onclick="showLanguageModal()">🇩🇪/🇬🇧</button>
+    </div>
+
+    <!-- Seiteninhalt -->
     <h1 id="title"></h1>
     <p id="description"></p>
     <p id="artutorial"></p>
