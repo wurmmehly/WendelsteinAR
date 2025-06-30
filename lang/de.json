@@ -1,13 +1,21 @@
 {
-  "title": "Hallo am Wendelstein",
+  "title": "Hallo am Wendelstein!",
   "redirect": "Zugriff auf Kamera und Standort erlauben?",
   "redirectYes": "Ja",
   "redirectNo": "Nein",
   "description": "Hier haben Sie die Möglichkeit, verschiedene Bestandteile des Observatoriums mit Hilfe ihres Smartphones zu erkunden. Auf der folgenden Karte können Sie Punkte erkennen, an welchen Sie durch Augmented Reality (AR) einen Blick auf das 2m Teleskop des Obsveratoriums werfen können. Zusätzlich gibt es weitere Abschnitte, die von jedem Ort aus auf ihrem Smartphone genauer betrachtet werden können.",
   "artutorial": "Keine Erfahrungen mit AR? Dann nutzen Sie unser Tutorial",
+  "panorama": {
+    "text": "Start",
+    "class": "panorama-btn"
+  },
   "map": {
     "text": "Karte starten",
     "class": "map-btn"
+  },
+  "marker": {
+    "text": "Start",
+    "class": "marker-btn"
   },
   "tutorial": {
     "text": "Tutorial ansehen",
