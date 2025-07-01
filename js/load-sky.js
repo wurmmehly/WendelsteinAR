@@ -113,11 +113,6 @@ AFRAME.registerComponent("load-sky", {
     var waypointAzStick = document.createElement("a-entity");
     waypointAzStick.setAttribute("id", `${objectId}WaypointAzStick`);
     waypointAzStick.setAttribute("rotation", { x: 0, y: -altaz.az, z: 0 });
-    waypointAzStick.setAttribute("position", { x: 0, y: 3.209, z: 0 });
-    waypointAzStick.setAttribute("gps-projected-entity-place", {
-      latitude: WENDELSTEIN.latitude,
-      longitude: WENDELSTEIN.longitude,
-    });
 
     var waypointAltStick = document.createElement("a-entity");
     waypointAltStick.setAttribute("id", `${objectId}WaypointAltStick`);
