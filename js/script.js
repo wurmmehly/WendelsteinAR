@@ -56,7 +56,17 @@ function updateContent(lang) {
       });
 
       [
+        [
+          "marker",
+          t?.marker?.text ?? "marker",
+          t?.marker?.class ?? "default-btn",
+        ],
         ["map", t?.map?.text ?? "map", t?.map?.class ?? "default-btn"],
+        [
+          "panorama",
+          t?.panorama?.text ?? "panorama",
+          t?.panorama?.class ?? "default-btn",
+        ],
         [
           "tutorial",
           t?.tutorial?.text ?? "Tutorial",
