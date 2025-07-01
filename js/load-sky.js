@@ -6,20 +6,6 @@ const WENDELSTEIN = {
 };
 const CELESTIAL_SPHERE_RADIUS = 100;
 
-// az und alt sollen beide als dezimalle Grade sein
-// r ist der Radius der himmlische Kugel
-function azalt2xyz(az, alt, r, center) {
-  azRad = az * DEGREE2RAD;
-  altRad = alt * DEGREE2RAD;
-
-  cosalt = Math.cos(altRad);
-  return {
-    x: r * Math.sin(azRad) * cosalt + center.x,
-    y: r * Math.sin(altRad) + center.y,
-    z: -r * Math.cos(azRad) * cosalt + center.z,
-  };
-}
-
 function emitReadMoreSignal() {
   document.querySelector("a-camera").emit("readmore", {}, false);
 }
@@ -46,14 +32,9 @@ AFRAME.registerComponent("load-sky", {
     this.waypointEls = [];
     this.waypointRaycastableEls = [];
     this.waypointCoords = {};
-    this.camera = this.el.querySelector("a-camera");
-    this.assetsEl = this.el.querySelector("a-assets");
-    this.fraunhoferBeam = this.el.querySelector("#fraunhoferBeam");
 
-    this.telescopePosition = {
-      ...this.el.querySelector("#fraunhoferRig").getAttribute("position"),
-    };
-    this.telescopePosition.y = 3.209;
+    this.assets = document.querySelector("a-assets");
+    this.fraunhoferBeam = document.querySelector("#fraunhoferBeam");
 
     this.overlay = document.querySelector("#overlay");
     this.readMoreContainer = this.overlay.querySelector("#readMoreContainer");
@@ -85,25 +66,16 @@ AFRAME.registerComponent("load-sky", {
         az =
           relCoords.azimuth > 180 ? 180 - relCoords.azimuth : relCoords.azimuth;
 
-        var xyzCoords = azalt2xyz(
-          az,
-          alt,
-          CELESTIAL_SPHERE_RADIUS,
-          this.telescopePosition
-        );
-
-        this.addWaypoint(objectId, xyzCoords);
         this.waypointCoords[objectId] = {
           alt: alt,
           az: az,
         };
+        this.addWaypoint(objectId, this.waypointCoords[objectId]);
       }
 
-      this.camera.emit(
-        "skyloaded",
-        { waypointCoords: this.waypointCoords },
-        false
-      );
+      document
+        .querySelector("a-camera")
+        .emit("skyloaded", { waypointCoords: this.waypointCoords }, false);
 
       // hört zu, wenn Waypoints geklickt werden
       this.openHologramPanel = this.openHologramPanel.bind(this);
@@ -130,25 +102,52 @@ AFRAME.registerComponent("load-sky", {
     var imgAssetEl = document.createElement("img");
 
     imgAssetEl.setAttribute("id", `${objectId}Image`);
-    imgAssetEl.setAttribute("src", `../images/objects/${objectId}.jpg`);
+    imgAssetEl.setAttribute("src", `/images/objects/${objectId}.jpg`);
     imgAssetEl.setAttribute("crossorigin", "anonymous");
 
-    this.assetsEl.append(imgAssetEl);
+    this.assets.append(imgAssetEl);
   },
 
   // Fügt ein "waypoint" an der Position im Himmel hinzu
-  addWaypoint: function (objectId, position) {
+  addWaypoint: function (objectId, altaz) {
+    var waypointAzStick = document.createElement("a-entity");
+    waypointAzStick.setAttribute("id", `${objectId}WaypointAzStick`);
+    waypointAzStick.setAttribute("rotation", { x: 0, y: -altaz.az, z: 0 });
+    waypointAzStick.setAttribute("position", { x: 0, y: 3.209, z: 0 });
+    waypointAzStick.setAttribute("gps-projected-entity-place", {
+      latitude: WENDELSTEIN.latitude,
+      longitude: WENDELSTEIN.longitude,
+    });
+
+    var waypointAltStick = document.createElement("a-entity");
+    waypointAltStick.setAttribute("id", `${objectId}WaypointAltStick`);
+    waypointAltStick.setAttribute("rotation", { x: altaz.alt, y: 0, z: 0 });
+
     var waypointEl = document.createElement("a-entity");
     waypointEl.setAttribute("id", `${objectId}Waypoint`);
-    waypointEl.setAttribute("position", position);
     waypointEl.setAttribute("mixin", "waypointFrame");
     waypointEl.setAttribute("class", "waypoint");
+    waypointEl.setAttribute("position", {
+      x: 0,
+      y: 0,
+      z: -CELESTIAL_SPHERE_RADIUS,
+    });
 
     var waypointImageEl = document.createElement("a-entity");
     waypointImageEl.setAttribute("id", `${objectId}WaypointImage`);
     waypointImageEl.setAttribute("material", `src: #${objectId}Image`);
     waypointImageEl.setAttribute("mixin", "waypointImage");
     waypointEl.appendChild(waypointImageEl);
+
+    var waypointRaycastableEl = document.createElement("a-entity");
+    waypointRaycastableEl.setAttribute("id", objectId);
+    waypointRaycastableEl.setAttribute("class", "raycastable");
+    waypointRaycastableEl.setAttribute("mixin", "waypointRaycastable");
+    waypointRaycastableEl.setAttribute("position", {
+      x: 0,
+      y: 0,
+      z: -CELESTIAL_SPHERE_RADIUS,
+    });
 
     this.objectInfoPromise.then((objectInfo) => {
       waypointEl.appendChild(
@@ -161,15 +160,12 @@ AFRAME.registerComponent("load-sky", {
     });
 
     this.waypointEls.push(waypointEl);
-    this.el.append(waypointEl);
-
-    var waypointRaycastableEl = document.createElement("a-entity");
-    waypointRaycastableEl.setAttribute("id", objectId);
-    waypointRaycastableEl.setAttribute("class", "raycastable");
-    waypointRaycastableEl.setAttribute("mixin", "waypointRaycastable");
-    waypointRaycastableEl.setAttribute("position", position);
     this.waypointRaycastableEls.push(waypointRaycastableEl);
-    this.el.append(waypointRaycastableEl);
+
+    waypointAltStick.append(waypointEl);
+    waypointAltStick.append(waypointRaycastableEl);
+    waypointAzStick.append(waypointAltStick);
+    this.el.append(waypointAzStick);
   },
 
   createInfoHologram: function (objectId, title, desc) {
@@ -226,13 +222,11 @@ AFRAME.registerComponent("load-sky", {
       if (objectId === evt.target.id) continue;
 
       var otherWaypoint = this.getWaypoint(objectId);
-      const new_pos = azalt2xyz(
-        coords.az,
-        coords.alt,
-        CELESTIAL_SPHERE_RADIUS + 10,
-        this.telescopePosition
-      );
-      animate(otherWaypoint, "position", new_pos);
+      animate(otherWaypoint, "position", {
+        x: 0,
+        y: 0,
+        z: -(CELESTIAL_SPHERE_RADIUS + 10),
+      });
     }
 
     animate(waypoint, "scale", { x: 1.5, y: 1.5, z: 1.5 });
@@ -262,13 +256,11 @@ AFRAME.registerComponent("load-sky", {
       if (objectId === evt.target.id) continue;
 
       var otherWaypoint = this.getWaypoint(objectId);
-      const new_pos = azalt2xyz(
-        coords.az,
-        coords.alt,
-        CELESTIAL_SPHERE_RADIUS,
-        this.telescopePosition
-      );
-      animate(otherWaypoint, "position", new_pos);
+      animate(otherWaypoint, "position", {
+        x: 0,
+        y: 0,
+        z: -CELESTIAL_SPHERE_RADIUS,
+      });
     }
 
     waypoint

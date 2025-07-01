@@ -21,7 +21,6 @@
       embedded
       arjs="sourceType: webcam; debugUIEnabled: false"
       renderer="antialias: false; logarithmicDepthBuffer:true"
-      load-sky
     >
       <a-assets>
         <a-mixin
@@ -90,6 +89,12 @@
         telescope-control
         rotation="0 0 0"
       ></a-camera>
+
+      <a-entity
+        load-sky
+        id="celestialSphere"
+        gps-projected-position="latitude: 48.129934; longitude: 11.5647932"
+      ></a-entity>
 
       <!-- Modell an GPS-Koordinaten -->
       <a-entity
