@@ -1,10 +1,11 @@
 const DEGREE2RAD = Math.PI / 180;
-const FRAUNHOFER = {
-  latitude: 47.703563,
-  longitude: 12.012455,
-  altitude: 1838,
-};
 const CELESTIAL_SPHERE_RADIUS = 100;
+var FRAUNHOFER;
+fetch("/resources/telescopeCoords.json")
+  .then((response) => response.json())
+  .then((telescopeCoords) => {
+    FRAUNHOFER = telescopeCoords.fraunhofer;
+  });
 
 function emitReadMoreSignal() {
   document.querySelector("a-camera").emit("readmore", {}, false);
@@ -39,9 +40,6 @@ AFRAME.registerComponent("load-sky", {
     this.overlay = document.querySelector("#overlay");
     this.readMoreContainer = this.overlay.querySelector("#readMoreContainer");
 
-    this.objectCoordsPromise = fetch("resources/coordinates.json").then(
-      (response) => response.json()
-    );
     this.langDictPromise = fetch(`lang/${lang}.json`)
       .then((response) => response.json())
       .then((langDict) => langDict);
@@ -50,52 +48,70 @@ AFRAME.registerComponent("load-sky", {
       (langDict) => langDict.skyObjects
     );
 
-    // die Bilder laden; "Waypoints" in den Himmel hinzufügen
-    this.objectCoordsPromise.then((objectCoords) => {
-      for (const [objectId, radecCoords] of Object.entries(objectCoords)) {
-        this.loadImage(objectId);
-
-        var observation = new Orb.Observation({
-          observer: FRAUNHOFER,
-          target: radecCoords,
+    fetch("/resources/telescopeCoords.json")
+      .then((response) => response.json())
+      .then((telescopeCoords) => {
+        this.el.setAttribute("position", {
+          x: 0,
+          y: telescopeCoords.fraunhofer.altitude + 3.209,
+          z: 0,
         });
+        this.el.setAttribute("gps-projected-entity-place", {
+          latitude: telescopeCoords.fraunhofer.latitude,
+          longitude: telescopeCoords.fraunhofer.longitude,
+        });
+      });
 
-        var relCoords = observation.azel(new Date());
+    // die Bilder laden; "Waypoints" in den Himmel hinzufügen
+    fetch("/resources/objectCoords.json")
+      .then((response) => response.json())
+      .then((objectCoords) => {
+        for (const [objectId, radecCoords] of Object.entries(objectCoords)) {
+          this.loadImage(objectId);
 
-        alt = relCoords.elevation;
-        az =
-          relCoords.azimuth > 180 ? relCoords.azimuth - 360 : relCoords.azimuth;
+          var observation = new Orb.Observation({
+            observer: FRAUNHOFER,
+            target: radecCoords,
+          });
 
-        this.waypointCoords[objectId] = {
-          alt: alt,
-          az: az,
-        };
-        this.addWaypoint(objectId, this.waypointCoords[objectId]);
-      }
+          var relCoords = observation.azel(new Date());
 
-      document
-        .querySelector("a-camera")
-        .emit("skyloaded", { waypointCoords: this.waypointCoords }, false);
+          alt = relCoords.elevation;
+          az =
+            relCoords.azimuth > 180
+              ? relCoords.azimuth - 360
+              : relCoords.azimuth;
 
-      // hört zu, wenn Waypoints geklickt werden
-      this.openHologramPanel = this.openHologramPanel.bind(this);
-      this.highlightWaypoint = this.highlightWaypoint.bind(this);
-      this.closeHologramPanel = this.closeHologramPanel.bind(this);
-      for (var waypointRaycastableEl of this.waypointRaycastableEls) {
-        waypointRaycastableEl.addEventListener(
-          "locked-on-waypoint",
-          this.openHologramPanel
-        );
-        waypointRaycastableEl.addEventListener(
-          "raycaster-intersected",
-          this.highlightWaypoint
-        );
-        waypointRaycastableEl.addEventListener(
-          "raycaster-intersected-cleared",
-          this.closeHologramPanel
-        );
-      }
-    });
+          this.waypointCoords[objectId] = {
+            alt: alt,
+            az: az,
+          };
+          this.addWaypoint(objectId, this.waypointCoords[objectId]);
+        }
+
+        document
+          .querySelector("a-camera")
+          .emit("skyloaded", { waypointCoords: this.waypointCoords }, false);
+
+        // hört zu, wenn Waypoints geklickt werden
+        this.openHologramPanel = this.openHologramPanel.bind(this);
+        this.highlightWaypoint = this.highlightWaypoint.bind(this);
+        this.closeHologramPanel = this.closeHologramPanel.bind(this);
+        for (var waypointRaycastableEl of this.waypointRaycastableEls) {
+          waypointRaycastableEl.addEventListener(
+            "locked-on-waypoint",
+            this.openHologramPanel
+          );
+          waypointRaycastableEl.addEventListener(
+            "raycaster-intersected",
+            this.highlightWaypoint
+          );
+          waypointRaycastableEl.addEventListener(
+            "raycaster-intersected-cleared",
+            this.closeHologramPanel
+          );
+        }
+      });
   },
 
   loadImage: function (objectId) {
