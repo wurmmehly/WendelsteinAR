@@ -1,7 +1,7 @@
 const DEGREE2RAD = Math.PI / 180;
-const WENDELSTEIN = {
-  latitude: 48.1299327,
-  longitude: 11.5647978,
+const FRAUNHOFER = {
+  latitude: 47.703563,
+  longitude: 12.012455,
   altitude: 1838,
 };
 const CELESTIAL_SPHERE_RADIUS = 100;
@@ -56,7 +56,7 @@ AFRAME.registerComponent("load-sky", {
         this.loadImage(objectId);
 
         var observation = new Orb.Observation({
-          observer: WENDELSTEIN,
+          observer: FRAUNHOFER,
           target: radecCoords,
         });
 
