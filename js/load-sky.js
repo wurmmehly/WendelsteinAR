@@ -64,7 +64,7 @@ AFRAME.registerComponent("load-sky", {
 
         alt = relCoords.elevation;
         az =
-          relCoords.azimuth > 180 ? 180 - relCoords.azimuth : relCoords.azimuth;
+          relCoords.azimuth > 180 ? relCoords.azimuth - 360 : relCoords.azimuth;
 
         this.waypointCoords[objectId] = {
           alt: alt,
