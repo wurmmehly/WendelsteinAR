@@ -9,9 +9,7 @@
 
     <script src="https://cdn.jsdelivr.net/gh/lizard-isana/orb.js@v2.4/build/min/orb-core.v2.min.js"></script>
     <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
-    <script src="js/load-sky.js"></script>
-    <script src="js/telescope-control.js"></script>
-    <script src="js/telescope-gps.js"></script>
+    <script src="js/fraunhofer-sim.js"></script>
 
     <link href="css/locationfenster.css" rel="stylesheet" />
   </head>
@@ -88,6 +86,7 @@
         cursor="rayOrigin: mouse"
         raycaster="objects: #cancelBubble"
         telescope-control
+        look-controls="pointerLockEnabled: true"
         rotation="0 0 0"
       ></a-camera>
 
