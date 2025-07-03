@@ -1,0 +1,22 @@
+{
+  "fraunhofer": {
+    "latitude": 47.703563,
+    "longitude": 12.012455,
+    "altitude": 0
+  },
+  "fenster": {
+    "latitude": 0,
+    "longitude": 0,
+    "altitude": 0
+  },
+  "garcherBlick": {
+    "latitude": 0,
+    "longitude": 0,
+    "altitude": 0
+  },
+  "oben": {
+    "latitude": 0,
+    "longitude": 0,
+    "altitude": 0
+  }
+}

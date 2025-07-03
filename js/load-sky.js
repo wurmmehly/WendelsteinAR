@@ -1,10 +1,10 @@
 const DEGREE2RAD = Math.PI / 180;
 const CELESTIAL_SPHERE_RADIUS = 100;
 var FRAUNHOFER;
-fetch("/resources/telescopeCoords.json")
+fetch("./resources/geoCoords.json")
   .then((response) => response.json())
-  .then((telescopeCoords) => {
-    FRAUNHOFER = telescopeCoords.fraunhofer;
+  .then((geoCoords) => {
+    FRAUNHOFER = geoCoords.fraunhofer;
   });
 
 function emitReadMoreSignal() {
@@ -48,25 +48,25 @@ AFRAME.registerComponent("load-sky", {
       (langDict) => langDict.skyObjects
     );
 
-    fetch("/resources/telescopeCoords.json")
+    fetch("./resources/geoCoords.json")
       .then((response) => response.json())
-      .then((telescopeCoords) => {
+      .then((geoCoords) => {
         this.el.setAttribute("position", {
           x: 0,
-          y: telescopeCoords.fraunhofer.altitude + 3.209,
+            y: geoCoords.fraunhofer.altitude + 3.209,
           z: 0,
         });
         this.el.setAttribute("gps-projected-entity-place", {
-          latitude: telescopeCoords.fraunhofer.latitude,
-          longitude: telescopeCoords.fraunhofer.longitude,
+            latitude: geoCoords.fraunhofer.latitude,
+            longitude: geoCoords.fraunhofer.longitude,
         });
       });
 
     // die Bilder laden; "Waypoints" in den Himmel hinzufügen
-    fetch("/resources/objectCoords.json")
+    fetch("./resources/skyCoords.json")
       .then((response) => response.json())
-      .then((objectCoords) => {
-        for (const [objectId, radecCoords] of Object.entries(objectCoords)) {
+      .then((skyCoords) => {
+        for (const [objectId, radecCoords] of Object.entries(skyCoords)) {
           this.loadImage(objectId);
 
           var observation = new Orb.Observation({
@@ -118,7 +118,7 @@ AFRAME.registerComponent("load-sky", {
     var imgAssetEl = document.createElement("img");
 
     imgAssetEl.setAttribute("id", `${objectId}Image`);
-    imgAssetEl.setAttribute("src", `/images/objects/${objectId}.jpg`);
+    imgAssetEl.setAttribute("src", `./images/objects/${objectId}.jpg`);
     imgAssetEl.setAttribute("crossorigin", "anonymous");
 
     this.assets.append(imgAssetEl);
