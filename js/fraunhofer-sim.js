@@ -9,6 +9,7 @@ fetch("./resources/geoCoords.json")
   .then((geoCoords) => {
     FRAUNHOFER = geoCoords.fraunhofer;
   });
+const LANG = localStorage.getItem("language");
 
 // wenn delta weniger als diesen Nummer ist, wird die Bewegung verworfen
 const TINY_DELTA = 1e-6;
@@ -44,6 +45,20 @@ function modulateRotation(degrees) {
   return degrees;
 }
 
+function radec2azel(radec) {
+  var observation = new Orb.Observation({
+    observer: FRAUNHOFER,
+    target: radec,
+  });
+
+  var azalt = observation.azel(new Date());
+
+  return {
+    alt: azalt.elevation,
+    az: azalt.azimuth > 180 ? azalt.azimuth - 360 : azalt.azimuth,
+  };
+}
+
 function setAttributes(element, attributes) {
   for (const [attribute, value] of Object.entries(attributes)) {
     element.setAttribute(attribute, value);
@@ -55,13 +70,19 @@ function createElement(tagName, attributes) {
   return setAttributes(document.createElement(tagName), attributes);
 }
 
-function animate(element, property, val) {
-  element.setAttribute(`animation__${property}`, {
+function animate(element, property, val, animationOverrides = {}) {
+  var animationProps = {
     property: property,
     to: val,
     dur: 200,
     easing: "easeInOutQuad",
-  });
+  };
+
+  for (const [override, value] of Object.entries(animationOverrides)) {
+    animationProps[override] = value;
+  }
+
+  element.setAttribute(`animation__${property}`, animationProps);
 }
 
 function emitReadMoreSignal() {
@@ -70,9 +91,7 @@ function emitReadMoreSignal() {
 
 AFRAME.registerComponent("load-sky", {
   init: function () {
-    let lang = localStorage.getItem("language");
-
-    this.waypointEls = [];
+    this.waypointEls = {};
     this.waypointRaycastableEls = [];
     this.waypointCoords = {};
 
@@ -82,9 +101,9 @@ AFRAME.registerComponent("load-sky", {
     this.overlay = document.querySelector("#overlay");
     this.readMoreContainer = this.overlay.querySelector("#readMoreContainer");
 
-    this.langDictPromise = fetch(`lang/${lang}.json`)
-      .then((response) => response.json())
-      .then((langDict) => langDict);
+    this.langDictPromise = fetch(`lang/${LANG}.json`).then((response) =>
+      response.json()
+    );
 
     this.objectInfoPromise = this.langDictPromise.then(
       (langDict) => langDict.skyObjects
@@ -111,25 +130,16 @@ AFRAME.registerComponent("load-sky", {
       .then((response) => response.json())
       .then((skyCoords) => {
         for (const [objectId, radecCoords] of Object.entries(skyCoords)) {
-          this.loadImage(objectId);
+          // lädt Bild
+          this.assets.append(
+            createElement("img", {
+              id: `${objectId}Image`,
+              src: `./images/objects/${objectId}.jpg`,
+              crossorigin: "anonymous",
+            })
+          );
 
-          var observation = new Orb.Observation({
-            observer: FRAUNHOFER,
-            target: radecCoords,
-          });
-
-          var relCoords = observation.azel(new Date());
-
-          alt = relCoords.elevation;
-          az =
-            relCoords.azimuth > 180
-              ? relCoords.azimuth - 360
-              : relCoords.azimuth;
-
-          this.waypointCoords[objectId] = {
-            alt: alt,
-            az: az,
-          };
+          this.waypointCoords[objectId] = radec2azel(radecCoords);
           this.addWaypoint(objectId, this.waypointCoords[objectId]);
         }
 
@@ -156,22 +166,6 @@ AFRAME.registerComponent("load-sky", {
           );
         }
       });
-  },
-
-  loadImage: function (objectId) {
-    var imgAssetEl = document.createElement("img");
-
-    // imgAssetEl.setAttribute("id", `${objectId}Image`);
-    // imgAssetEl.setAttribute("src", `./images/objects/${objectId}.jpg`);
-    // imgAssetEl.setAttribute("crossorigin", "anonymous");
-
-    setAttributes(imgAssetEl, {
-      id: `${objectId}Image`,
-      src: `./images/objects/${objectId}.jpg`,
-      crossorigin: "anonymous",
-    });
-
-    this.assets.append(imgAssetEl);
   },
 
   // Fügt ein "waypoint" an der Position im Himmel hinzu
@@ -217,7 +211,7 @@ AFRAME.registerComponent("load-sky", {
       );
     });
 
-    this.waypointEls.push(waypointEl);
+    this.waypointEls[objectId] = waypointEl;
     this.waypointRaycastableEls.push(waypointRaycastableEl);
 
     waypointAltStick.append(waypointEl);
@@ -237,14 +231,6 @@ AFRAME.registerComponent("load-sky", {
         id: `${objectId}Title`,
         mixin: "hologramTitle",
         text: { value: title },
-      })
-    );
-
-    infoHologramEl.appendChild(
-      createElement("a-entity", {
-        id: `${objectId}Description`,
-        mixin: "hologramDesc",
-        text: { value: desc },
       })
     );
 
@@ -276,12 +262,12 @@ AFRAME.registerComponent("load-sky", {
   },
 
   openHologramPanel: function (evt) {
-    var waypoint = this.getWaypoint(evt.target.id);
+    var waypoint = this.waypointEls[evt.target.id];
 
     for (var [objectId, coords] of Object.entries(this.waypointCoords)) {
       if (objectId === evt.target.id) continue;
 
-      var otherWaypoint = this.getWaypoint(objectId);
+      var otherWaypoint = this.waypointEls[objectId];
       animate(otherWaypoint, "position", {
         x: 0,
         y: 0,
@@ -302,12 +288,12 @@ AFRAME.registerComponent("load-sky", {
   },
 
   closeHologramPanel: function (evt) {
-    var waypoint = this.getWaypoint(evt.target.id);
+    var waypoint = this.waypointEls[evt.target.id];
 
     for (var [objectId, coords] of Object.entries(this.waypointCoords)) {
       if (objectId === evt.target.id) continue;
 
-      var otherWaypoint = this.getWaypoint(objectId);
+      var otherWaypoint = this.waypointEls[objectId];
       animate(otherWaypoint, "position", {
         x: 0,
         y: 0,
@@ -327,13 +313,6 @@ AFRAME.registerComponent("load-sky", {
     readMoreEl = this.readMoreContainer.querySelector("#readMore");
     if (readMoreEl) readMoreEl.remove();
   },
-
-  getWaypoint: function (objectId) {
-    for (const waypoint of this.waypointEls) {
-      if (waypoint.id == objectId + "Waypoint") return waypoint;
-    }
-    return null;
-  },
 });
 
 AFRAME.registerComponent("telescope-control", {
@@ -346,6 +325,7 @@ AFRAME.registerComponent("telescope-control", {
 
     this.currentRay = { alt: 0, az: 0 };
     this.previousRay = { alt: 0, az: 0 };
+    this.currentTelescope = this.getCurrentTelescopeDirection();
 
     this.active = this.wasActive = false;
     this.lockedOnWaypoint = false;
