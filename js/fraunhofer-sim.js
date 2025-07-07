@@ -97,6 +97,7 @@ AFRAME.registerComponent("load-sky", {
 
     this.assets = document.querySelector("a-assets");
     this.fraunhoferBeam = document.querySelector("#fraunhoferBeam");
+    this.primaryMirror = this.fraunhoferBeam.querySelector("#primaryMirror");
 
     this.overlay = document.querySelector("#overlay");
     this.readMoreContainer = this.overlay.querySelector("#readMoreContainer");
@@ -203,11 +204,7 @@ AFRAME.registerComponent("load-sky", {
 
     this.objectInfoPromise.then((objectInfo) => {
       waypointEl.appendChild(
-        this.createInfoHologram(
-          objectId,
-          objectInfo[objectId].name,
-          objectInfo[objectId].desc
-        )
+        this.createInfoHologram(objectId, objectInfo[objectId].name)
       );
     });
 
@@ -220,7 +217,7 @@ AFRAME.registerComponent("load-sky", {
     this.el.append(waypointAzStick);
   },
 
-  createInfoHologram: function (objectId, title, desc) {
+  createInfoHologram: function (objectId, title) {
     infoHologramEl = createElement("a-entity", {
       id: `${objectId}HologramPanel`,
       mixin: "hologramPanel",
