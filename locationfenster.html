@@ -35,7 +35,6 @@
           material="shader: flat"
           position="0 0 0.005"
         ></a-mixin>
-
         <a-mixin
           id="waypointRaycastable"
           geometry="primitive: circle; radius: 5"
@@ -111,16 +110,30 @@
                 fuse="true"
               ></a-cursor>
 
-              <a-cone
+              <!-- <a-cylinder
                 id="fraunhoferBeam"
                 color="#f0ff72"
                 opacity=".2"
                 position="0 0 -500"
                 rotation="-90 0 0"
                 height="1000"
-                radius-bottom=".5"
-                radius-top="50"
-              ></a-cone>
+                radius="10.6"
+              ></a-cylinder> -->
+
+              <a-entity id="fraunhoferBeam" rotation="-90 0 0">
+                <a-entity
+                  id="primaryMirror"
+                  mirror-rays="start: 0 1000 10.6; length: 1006.7; tilt: 180"
+                ></a-entity>
+                <a-entity
+                  id="secondaryMirror"
+                  mirror-rays="start: 0 -6.7 10.6; length: 29.759; tilt: -13.803"
+                ></a-entity>
+                <a-entity
+                  id="tertiaryMirror"
+                  mirror-rays="start: 0 22.2 3.5; length: 33; tilt: 180"
+                ></a-entity>
+              </a-entity>
             </a-entity>
           </a-entity>
         </a-entity>

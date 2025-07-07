@@ -275,6 +275,8 @@ AFRAME.registerComponent("load-sky", {
       });
     }
 
+    this.primaryMirror.setAttribute("mirror-rays", { number: 4 });
+
     animate(waypoint, "scale", { x: 1.5, y: 1.5, z: 1.5 });
     waypoint
       .querySelector(`#${evt.target.id}HologramPanel`)
@@ -301,12 +303,11 @@ AFRAME.registerComponent("load-sky", {
       });
     }
 
+    this.primaryMirror.setAttribute("mirror-rays", { number: 60 });
+
     waypoint
       .querySelector(`#${evt.target.id}HologramPanel`)
       .setAttribute("visible", "false");
-
-    this.fraunhoferBeam.setAttribute("visible", "true");
-    animate(this.fraunhoferBeam, "radius-top", 50);
 
     animate(waypoint, "scale", { x: 1, y: 1, z: 1 });
 
@@ -318,6 +319,7 @@ AFRAME.registerComponent("load-sky", {
 AFRAME.registerComponent("telescope-control", {
   init: function () {
     this.raycaster = this.el.components["raycaster"];
+    this.fraunhoferRig = document.querySelector("#fraunhoferRig");
     this.fraunhoferTopPart = document.querySelector("#fraunhoferTopPart");
     this.fraunhoferTelescopeRig = this.fraunhoferTopPart.querySelector(
       "#fraunhoferTelescopeRig"
@@ -486,5 +488,94 @@ AFRAME.registerComponent("telescope-gps", {
           "gps-projected-entity-place": { latitude: lat, longitude: lon },
         });
       });
+  },
+});
+
+AFRAME.registerComponent("mirror-rays", {
+  schema: {
+    number: { type: "number", default: 60 },
+    start: { type: "vec3" },
+    length: { type: "number" },
+    tilt: { type: "number" },
+  },
+
+  init: function () {
+    this.rays = [];
+    this.rayContainers = [];
+
+    this.addRays(this.data.number);
+  },
+
+  update: function () {
+    this.removeAllRays();
+    this.addRays(this.data.number);
+    this.animate();
+  },
+
+  remove: function () {
+    this.removeAllRays();
+  },
+
+  addRays: function (num) {
+    const interval = 360 / num;
+    var i = 0;
+    while (i < num) {
+      const rayContainer = createElement("a-entity", {
+        rotation: { x: 0, y: i * interval, z: 0 },
+      });
+      const rayTiltContainer = createElement("a-entity", {
+        position: this.data.start,
+        rotation: { x: this.data.tilt, y: 0, z: 0 },
+      });
+      const ray = createElement("a-entity", {
+        mixin: "mirrorRay",
+        line: {
+          start: { x: 0, y: 0, z: 0 },
+          end: { x: 0, y: this.data.length, z: 0 },
+        },
+      });
+      this.rays.push(ray);
+      this.rayContainers.push(rayContainer);
+
+      rayTiltContainer.append(ray);
+      rayContainer.append(rayTiltContainer);
+      this.el.append(rayContainer);
+      i++;
+    }
+  },
+
+  removeAllRays: function () {
+    for (const rayContainer of this.rayContainers) {
+      rayContainer.remove();
+    }
+    this.rays = [];
+    this.rayContainers = [];
+  },
+
+  animate: function () {
+    const segmentLength = 5;
+    for (const ray of this.rays) {
+      var rayHighlight = createElement("a-entity", {
+        mixin: "mirrorRay",
+        line: {
+          start: { x: 0, y: 0, z: 0 },
+          end: { x: 0, y: segmentLength, z: 0 },
+          opacity: 1,
+        },
+        position: { x: 0, y: 0, z: 0 },
+        animation: {
+          property: "position",
+          to: {
+            x: 0,
+            y: this.data.length - segmentLength,
+            z: 0,
+          },
+          dur: 2000,
+          easing: "linear",
+          loop: true,
+        },
+      });
+      ray.after(rayHighlight);
+    }
   },
 });
