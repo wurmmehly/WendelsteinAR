@@ -23,6 +23,7 @@
   },
   "artitle": "AR Tutorial",
   "ardescription": "Go to the relevant location and select the appropriate marker after pressing ‘Start’. Then point your camera in the direction of the large dome.",
+  "readmore": "Read more",
 
   "skyObjects": {
     "m33": {

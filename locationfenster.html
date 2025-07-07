@@ -45,37 +45,27 @@
 
         <a-mixin
           id="hologramPanel"
-          geometry="primitive: plane; width: 100; height: 120"
+          geometry="primitive: plane; width: 100; height: 50"
           material="color: #999999; opacity: .5; transparent: false"
           scale=".2 .2 .2"
-          position="0 -15 0"
+          position="0 -7 0"
           visible="false"
         ></a-mixin>
         <a-mixin
           id="hologramTitle"
-          position="0 40 0"
+          position="0 -5 0"
           text="
             shader: msdf;
             baseline: top;
             align: center;
-            width: 135;
+            width: 90;
+            wrapCount: 16;
             font: https://cdn.aframe.io/examples/ui/Viga-Regular.json;
             color: white;
             transparent: false"
         ></a-mixin>
-        <a-mixin
-          id="hologramDesc"
-          position="0 30 0"
-          text="
-            shader: msdf;
-            baseline: top;
-            align: center;
-            font: roboto;
-            color: white;
-            width: 95;
-            wrapCount: 45;
-            transparent: false;"
-        ></a-mixin>
+
+        <a-mixin id="mirrorRay" line="color: #f0ff72; opacity: .5"></a-mixin>
       </a-assets>
 
       <!-- Kamera nutzt echte GPS-Position des Geräts -->
@@ -138,6 +128,8 @@
     </a-scene>
 
     <!-- Dies soll am Ende sein; andersweise lädt die <a-scene> über dem overlay -->
-    <div id="overlay" class="overlay"><div id="readMoreContainer"></div></div>
+    <div id="overlay" class="overlay">
+      <div id="readMoreContainer"></div>
+    </div>
   </body>
 </html>

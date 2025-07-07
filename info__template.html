@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ object.name }}</title>
+
+    <link href="/css/style.css" rel="stylesheet" />
+    <style>
+      html {
+        text-align: center;
+      }
+
+      img {
+        padding-top: 3em;
+      }
+    </style>
+  </head>
+  <body>
+    <img
+      id="objectPicture"
+      src="/images/objects/{{ object.id }}.jpg"
+      alt="Ein Bild von / A picture of {{ object.name }}"
+      width="40%"
+    />
+
+    <h1 id="objectName">{{ object.name }}</h1>
+
+    <p id="objectDesc">{{ object.desc }}</p>
+  </body>
+</html>

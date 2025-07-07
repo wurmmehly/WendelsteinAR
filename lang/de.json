@@ -23,6 +23,7 @@
   },
   "artitle": "AR Tutorial",
   "ardescription": "Begeben Sie sich zum entsprechenden Standort und wählen Sie den passenden Marker nach drücken von “Start”. Halten Sie anschließend Ihre Kamera in Richtung der großen Kuppel.",
+  "readmore": "Weiter lesen",
 
   "skyObjects": {
     "m33": {

@@ -251,21 +251,28 @@ AFRAME.registerComponent("load-sky", {
     return infoHologramEl;
   },
 
-  createReadMoreButton: function () {
-    // <button id="read-more" onclick="emitReadMoreSignal()"></button>
-
-    if (this.overlay.querySelector("#read-more")) return;
-
-    var readMoreEl = createElement("button", {
+  createReadMoreButton: function (objectId) {
+    var readMoreEl = createElement("a", {
       id: "readMore",
-      onclick: "emitReadMoreSignal()",
+      class: "button",
+      href: `object/${LANG}/${objectId}.html`,
+      target: "_blank",
+      rel: "noopener noreferrer",
     });
-    readMoreEl.setAttribute("onclick", "emitReadMoreSignal()");
     this.langDictPromise.then(
       (langDict) => (readMoreEl.textContent = langDict.readmore)
     );
 
     return readMoreEl;
+  },
+
+  highlightWaypoint: function (evt) {
+    animate(this.waypointEls[evt.target.id], "scale", {
+      x: 1.2,
+      y: 1.2,
+      z: 1.2,
+    });
+    animate(this.fraunhoferBeam, "radius-top", 60);
   },
 
   openHologramPanel: function (evt) {
@@ -287,19 +294,11 @@ AFRAME.registerComponent("load-sky", {
       .querySelector(`#${evt.target.id}HologramPanel`)
       .setAttribute("visible", "true");
 
-    // this.fraunhoferBeam.setAttribute("visible", "false");
-    animate(this.fraunhoferBeam, "radius-top", 75);
-
-    this.readMoreContainer.appendChild(this.createReadMoreButton());
-  },
-
-  highlightWaypoint: function (evt) {
-    animate(this.getWaypoint(evt.target.id), "scale", {
-      x: 1.2,
-      y: 1.2,
-      z: 1.2,
-    });
-    animate(this.fraunhoferBeam, "radius-top", 60);
+    var readMoreEl = this.overlay.querySelector("#readMore");
+    if (readMoreEl) readMoreEl.remove();
+    this.readMoreContainer.appendChild(
+      this.createReadMoreButton(evt.target.id)
+    );
   },
 
   closeHologramPanel: function (evt) {
@@ -365,12 +364,6 @@ AFRAME.registerComponent("telescope-control", {
     this.el.addEventListener("skyloaded", (evt) => {
       this.waypointCoords = evt.detail.waypointCoords;
       this.closestWaypoint = this.getClosestWaypoint();
-    });
-
-    this.el.addEventListener("readmore", (evt) => {
-      window.open(
-        `images/objects/original/${this.closestWaypoint.objectId}.jpg`
-      );
     });
   },
 

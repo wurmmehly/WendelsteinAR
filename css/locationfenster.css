@@ -1,19 +1,35 @@
 .overlay {
   z-index: 999999999;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
 }
 
 #readMoreContainer {
-  position: fixed;
-  text-align: center;
-  width: 100%;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: last baseline;
 }
 
 #readMore {
+  margin-bottom: 50px;
+}
+
+.button {
   background-color: #33333388;
-  position: fixed;
-  bottom: 2%;
+  bottom: 50vh;
   color: white;
-  padding: 0.25em;
-  font-size: 16px;
-  border-radius: 25%;
+  padding: .35em .5em;
+  border-radius: .5em;
+  text-align: center;
+  text-decoration: none;
+  font-size: 20px;
+  font-family: "Atkinson Hyperlegible", sans-serif;
+  cursor: pointer;
+  pointer-events: all;
 }
