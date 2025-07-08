@@ -1,3 +1,5 @@
+const FAR = 0.05;
+
 function setLanguage(lang) {
   localStorage.setItem("language", lang);
   document.documentElement.lang = lang;
@@ -17,7 +19,33 @@ function showLanguageModal() {
 }
 
 function redirectToIndex() {
-  document.getElementById("redirect-modal").classList.add("hidden");
+  // findet aus, wie weit vom Fraunhofer der Benutzer ist
+  var deltaLon;
+  var deltaLat;
+  fetch("./resources/geoCoords.json")
+    .then((response) => response.json())
+    .then((geoCoords) => {
+      navigator.geolocation.getCurrentPosition(
+        (loc) => {
+          deltaLat = Math.abs(
+            loc.coords.latitude - geoCoords.fraunhofer.latitude
+          );
+          deltaLon = Math.abs(
+            loc.coords.longitude - geoCoords.fraunhofer.longitude
+          );
+        },
+        (err) => {
+          // wenn getCurrentPosition schlägt fehl, leitet den Benutzer an die andere Seite weiter
+          deltaLat = deltaLon = 1000;
+        }
+      );
+    });
+
+  if (deltaLon ** 2 + deltaLat ** 2 < FAR ** 2) {
+    document.getElementById("redirect-modal").classList.add("hidden");
+  } else {
+    redirectToOtherPage();
+  }
 }
 
 function redirectToOtherPage() {
