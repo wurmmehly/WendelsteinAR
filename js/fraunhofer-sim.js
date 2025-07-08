@@ -3,11 +3,19 @@ const RAD2DEG = 180 / Math.PI;
 const CELESTIAL_SPHERE_RADIUS = 100;
 const MIN_ALT = 20;
 const MAX_ALT = 90;
+
+const urlParams = new URLSearchParams(window.location.search);
+var locationName = urlParams.get("loc");
+var location;
 var FRAUNHOFER;
 fetch("./resources/geoCoords.json")
   .then((response) => response.json())
   .then((geoCoords) => {
     FRAUNHOFER = geoCoords.fraunhofer;
+
+    if (locationName in geoCoords) {
+      location = geoCoords[locationName];
+    }
   });
 const LANG = localStorage.getItem("language");
 
@@ -573,6 +581,23 @@ AFRAME.registerComponent("mirror-rays", {
         },
       });
       ray.after(rayHighlight);
+    }
+  },
+});
+
+AFRAME.registerComponent("camera-gps", {
+  init: function () {
+    if (locationName) {
+      setAttributes(this.el, {
+        simulateLatitude: location.latitude,
+        simulateLongitude: location.longitude,
+        simulateAltitude: location.altitude,
+      });
+    } else {
+      this.el.setAttribute("gps-projected-camera", {
+        gpsMinDistance: 15,
+        gpsTimeInterval: 5,
+      });
     }
   },
 });

@@ -11,7 +11,7 @@
     <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
     <script src="js/fraunhofer-sim.js"></script>
 
-    <link href="css/locationfenster.css" rel="stylesheet" />
+    <link href="css/style.css" rel="stylesheet" />
   </head>
 
   <body style="margin: 0; overflow: hidden">
@@ -22,6 +22,8 @@
       renderer="antialias: false; logarithmicDepthBuffer:true"
     >
       <a-assets>
+        <!-- <img id="opticalSky" src="images/optical_nasa_skymap_full.jpg" /> -->
+
         <a-mixin
           id="waypointFrame"
           geometry="primitive: circle; radius: 5"
@@ -58,7 +60,7 @@
             baseline: top;
             align: center;
             width: 90;
-            wrapCount: 16;
+            wrapCount: 21.9s;
             font: https://cdn.aframe.io/examples/ui/Viga-Regular.json;
             color: white;
             transparent: false"
@@ -67,16 +69,18 @@
         <a-mixin id="mirrorRay" line="color: #f0ff72; opacity: .5"></a-mixin>
       </a-assets>
 
+      <!-- <a-sky src="#opticalSky"></a-sky> -->
+
       <!-- Kamera nutzt echte GPS-Position des Geräts -->
       <!-- Dieses Cursor kann beim Klick das Info-Panel schließen -->
       <a-camera
         id="camera"
-        gps-projected-camera="gpsMinDistance: 15"
-        cursor="rayOrigin: mouse"
-        raycaster="objects: #cancelBubble"
-        telescope-control
         look-controls="pointerLockEnabled: true"
-        rotation="0 0 0"
+        cursor="rayOrigin: mouse"
+        raycaster="objects: none"
+        telescope-control
+        camera-gps
+        camera-controls
       ></a-camera>
 
       <a-entity load-sky id="celestialSphere"></a-entity>
@@ -110,28 +114,18 @@
                 fuse="true"
               ></a-cursor>
 
-              <!-- <a-cylinder
-                id="fraunhoferBeam"
-                color="#f0ff72"
-                opacity=".2"
-                position="0 0 -500"
-                rotation="-90 0 0"
-                height="1000"
-                radius="10.6"
-              ></a-cylinder> -->
-
               <a-entity id="fraunhoferBeam" rotation="-90 0 0">
                 <a-entity
                   id="primaryMirror"
-                  mirror-rays="start: 0 1000 10.6; length: 1006.7; tilt: 180"
+                  mirror-rays="start: 0 1000 10.2; length: 1005.4; tilt: 180"
                 ></a-entity>
                 <a-entity
                   id="secondaryMirror"
-                  mirror-rays="start: 0 -6.7 10.6; length: 29.759; tilt: -13.803"
+                  mirror-rays="start: 0 -5.4 10.2; length: 28.5; tilt: -13.725"
                 ></a-entity>
                 <a-entity
                   id="tertiaryMirror"
-                  mirror-rays="start: 0 22.2 3.5; length: 33; tilt: 180"
+                  mirror-rays="start: 0 22.2 3.5; length: 24; tilt: 184"
                 ></a-entity>
               </a-entity>
             </a-entity>
@@ -142,7 +136,7 @@
 
     <!-- Dies soll am Ende sein; andersweise lädt die <a-scene> über dem overlay -->
     <div id="overlay" class="overlay">
-      <div id="readMoreContainer"></div>
+      <div id="readMoreContainer" class="container"></div>
     </div>
   </body>
 </html>
