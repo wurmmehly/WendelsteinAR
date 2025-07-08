@@ -24,12 +24,14 @@
           img.setAttribute("alt", langDict.objectinfoalt + objectInfo.name);
         });
     </script>
-    <link href="/css/style.css" rel="stylesheet" />
+    <link href="css/style.css" rel="stylesheet" />
   </head>
-  <body style="text-align: center">
-    <img id="objectPicture" width="40%" style="padding-top: 3em" />
+  <body>
+    <div id="objectInfo">
+      <img id="objectPicture" />
 
-    <h1 id="objectName"></h1>
-    <p id="objectDesc"></p>
+      <h1 id="objectName"></h1>
+      <p id="objectDesc"></p>
+    </div>
   </body>
 </html>

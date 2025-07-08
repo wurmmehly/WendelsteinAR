@@ -238,7 +238,7 @@ AFRAME.registerComponent("load-sky", {
     var readMoreEl = createElement("a", {
       id: "readMore",
       class: "button",
-      href: `object/${LANG}/${objectId}.html`,
+      href: "./object.html?id=" + objectId,
       target: "_blank",
       rel: "noopener noreferrer",
     });

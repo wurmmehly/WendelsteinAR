@@ -247,3 +247,63 @@ body::before {
     font-size: 1em;
   }
 }
+
+
+/* Für fraunhofer-sim */
+.overlay {
+  z-index: 999999999;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+}
+
+.container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+}
+
+#readMoreContainer {
+  justify-content: center;
+  align-items: last baseline;
+}
+
+#readMore {
+  margin-bottom: 50px;
+}
+
+.button {
+  background-color: #33333388;
+  bottom: 50vh;
+  color: white;
+  padding: .35em .5em;
+  border-radius: .5em;
+  text-align: center;
+  text-decoration: none;
+  font-size: 20px;
+  font-family: "Atkinson Hyperlegible", sans-serif;
+  cursor: pointer;
+  pointer-events: all;
+}
+
+
+/* Für Objekt-Info Anzeigen */
+#objectPicture {
+  width: min(500px, 80%);
+  border: 5px solid white;
+  border-radius: 50px;
+}
+
+#objectInfo {
+  text-align: center;
+  margin: 3em 5%;
+}
+
+#objectName {
+  line-height: 1.15;
+  margin-top: 1em;
+  margin-bottom: .5em;
+}
