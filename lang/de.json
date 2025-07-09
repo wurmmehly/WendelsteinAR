@@ -9,6 +9,12 @@
     "text": "Start",
     "class": "panorama-btn"
   },
+  "menu": {
+    "tour": "360°-Tour",
+    "location": "AR Modelle",
+    "model": "Teleskop Modell",
+    "sky": "Sternenbilder"
+  },
   "map": {
     "text": "Karte starten",
     "class": "map-btn"

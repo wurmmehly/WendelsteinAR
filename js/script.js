@@ -1,5 +1,12 @@
-//const FAR = 0.05;
+// Hamburger MenÜ Links
+const pages = [
+  { key: "tour", url: "360tour.html" },
+  { key: "location", url: "location.html" },
+  { key: "model", url: "model.html" },
+  { key: "sky", url: "fraunhofer-sim.html" },
+];
 
+// Sprachwahl & Content
 function setLanguage(lang) {
   localStorage.setItem("language", lang);
   document.documentElement.lang = lang;
@@ -12,6 +19,9 @@ function setLanguage(lang) {
   setTimeout(function () {
     document.getElementById("redirect-modal").classList.remove("hidden");
   }, 250);
+
+  // Hamburger-Menü aktualisieren
+  renderHamburgerMenu(lang, getCurrentPageKey());
 }
 
 function showLanguageModal() {
@@ -20,7 +30,7 @@ function showLanguageModal() {
 
 function redirectToIndex() {
   document.getElementById("redirect-modal").classList.add("hidden");
-  /* findet aus, wie weit vom Fraunhofer der Benutzer ist
+  /* Geolokalisierungs-Logik ggf. wieder aktivieren
   var deltaLon;
   var deltaLat;
   fetch("./resources/geoCoords.json")
@@ -36,7 +46,6 @@ function redirectToIndex() {
           );
         },
         (err) => {
-          // wenn getCurrentPosition schlägt fehl, leitet den Benutzer an die andere Seite weiter
           deltaLat = deltaLon = 1000;
         }
       );
@@ -45,7 +54,9 @@ function redirectToIndex() {
   if (deltaLon ** 2 + deltaLat ** 2 < FAR ** 2) {
     document.getElementById("redirect-modal").classList.add("hidden");
   } else {
-    redirectToOtherPage();*/
+    redirectToOtherPage();
+  }
+  */
 }
 
 function redirectToOtherPage() {
@@ -53,19 +64,22 @@ function redirectToOtherPage() {
 }
 
 window.onload = function () {
-  let lang = localStorage.getItem("language");
+  let lang = localStorage.getItem("language") || "de";
+  let currentPageKey = getCurrentPageKey();
+  renderHamburgerMenu(lang, currentPageKey);
+
   if (!lang) {
     document.getElementById("language-modal").classList.remove("hidden");
     document.getElementById("redirect-modal").classList.add("hidden");
   } else {
     document.documentElement.lang = lang;
     updateContent(lang);
-    // Direkt das zweite Modal zeigen
     document.getElementById("redirect-modal").classList.remove("hidden");
     document.getElementById("language-modal").classList.add("hidden");
   }
 };
 
+// Content aktualisieren mit Sprachdatei
 function updateContent(lang) {
   const cacheBuster = Date.now();
   fetch(`lang/${lang}.json?cb=${cacheBuster}`)
@@ -95,12 +109,9 @@ function updateContent(lang) {
           t?.panorama?.text ?? "panorama",
           t?.panorama?.class ?? "default-btn",
         ],
-
         [
           "tutorial",
-
           t?.tutorial?.text ?? "Tutorial",
-
           t?.tutorial?.class ?? "default-btn",
         ],
         ["redirectYesBtn", t?.redirectYes ?? "Ja", "btn redirect-btn-yes"],
@@ -114,3 +125,52 @@ function updateContent(lang) {
       });
     });
 }
+
+//Menu Funktionen
+function getCurrentPageKey() {
+  const file = window.location.pathname.split("/").pop();
+  if (file === "360tour.html") return "tour";
+  if (file === "location.html") return "location";
+  if (file === "model.html") return "model";
+  if (file === "fraunhofer-sim.html") return "sky";
+  return null;
+}
+
+function renderHamburgerMenu(lang, currentPageKey) {
+  fetch(`lang/${lang}.json?cb=${Date.now()}`)
+    .then((response) => response.json())
+    .then((t) => {
+      const nav = document.getElementById("menu-nav");
+      if (!nav) return;
+      nav.innerHTML = "";
+      pages.forEach((page) => {
+        if (page.key === currentPageKey) {
+          const span = document.createElement("span");
+          span.textContent = t.menu?.[page.key] ?? page.key;
+          span.className = "current-page";
+          nav.appendChild(span);
+        } else {
+          const a = document.createElement("a");
+          a.href = page.url;
+          a.textContent = t.menu?.[page.key] ?? page.key;
+          nav.appendChild(a);
+        }
+      });
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  const menuToggle = document.getElementById("menu-toggle");
+  const menuNav = document.getElementById("menu-nav");
+  if (menuToggle && menuNav) {
+    menuToggle.addEventListener("click", () => {
+      menuNav.classList.toggle("hidden");
+    });
+
+    menuNav.addEventListener("click", (e) => {
+      if (e.target.tagName === "A") {
+        menuNav.classList.add("hidden");
+      }
+    });
+  }
+});

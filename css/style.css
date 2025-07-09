@@ -67,7 +67,7 @@ body::before {
   padding: 12px 24px;
   border: none;
   border-radius: 5px;
-  font-size: 1em;
+  font-size: 1.1em;
   cursor: pointer;
   transition: background 0.3s;
 }
@@ -218,6 +218,47 @@ body::before {
   z-index: 10;
 }
 
+.hamburger-menu {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1200;
+}
+#menu-toggle {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 2em;
+  cursor: pointer;
+}
+.menu-nav {
+  background: #222;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  margin-top: 10px;
+  padding: 1em 1.5em;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+.menu-nav.hidden {
+  display: none;
+}
+.menu-nav a {
+  color: white;
+  text-decoration: none;
+  font-size: 1.1em;
+  transition: color 0.2s;
+}
+
+.menu-nav .current-page {
+  color: #00883a;
+  font-weight: bold;
+  pointer-events: none;
+  cursor: default;
+  text-decoration: underline;
+}
+
 /* Responsive Anpassungen für kleine Bildschirme*/
 @media (max-width: 600px) {
   body {
@@ -247,7 +288,6 @@ body::before {
     font-size: 1em;
   }
 }
-
 
 /* Für fraunhofer-sim */
 .overlay {
@@ -279,8 +319,8 @@ body::before {
   background-color: #33333388;
   bottom: 50vh;
   color: white;
-  padding: .35em .5em;
-  border-radius: .5em;
+  padding: 0.35em 0.5em;
+  border-radius: 0.5em;
   text-align: center;
   text-decoration: none;
   font-size: 20px;
@@ -288,7 +328,6 @@ body::before {
   cursor: pointer;
   pointer-events: all;
 }
-
 
 /* Für Objekt-Info Anzeigen */
 #objectPicture {
@@ -305,5 +344,5 @@ body::before {
 #objectName {
   line-height: 1.15;
   margin-top: 1em;
-  margin-bottom: .5em;
+  margin-bottom: 0.5em;
 }

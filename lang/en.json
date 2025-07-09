@@ -9,6 +9,12 @@
     "text": "Start",
     "class": "panorama-btn"
   },
+  "menu": {
+    "tour": "360°-Tour",
+    "location": "AR Model",
+    "model": "Telescope Model",
+    "sky": "Sky Images"
+  },
   "map": {
     "text": "Start map",
     "class": "map-btn"
