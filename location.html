@@ -84,6 +84,10 @@
 </head>
 
 <body style="margin: 0; overflow: hidden">
+    <div id="hamburger-menu" class="hamburger-menu">
+        <button id="menu-toggle" aria-label="Menü öffnen">&#9776;</button>
+        <nav id="menu-nav" class="menu-nav hidden"></nav>
+    </div>
     <a-scene vr-mode-ui="enabled: false" arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false"
         renderer="antialias: true; alpha: true" gltf-model="dracoDecoderPath: draco/;" loading-screen="enabled: false">
         <a-assets>
