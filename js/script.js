@@ -74,7 +74,6 @@ function updateContent(lang) {
       [
         ["title", t?.title ?? ""],
         ["description", t?.description ?? ""],
-        ["artutorial", t?.artutorial ?? ""],
         ["artitle", t?.artitle ?? ""],
         ["ardescription", t?.ardescription ?? ""],
         ["redirect", t?.redirect ?? ""],
@@ -94,11 +93,6 @@ function updateContent(lang) {
           "panorama",
           t?.panorama?.text ?? "panorama",
           t?.panorama?.class ?? "default-btn",
-        ],
-        [
-          "tutorial",
-          t?.tutorial?.text ?? "Tutorial",
-          t?.tutorial?.class ?? "default-btn",
         ],
         ["redirectYesBtn", t?.redirectYes ?? "Ja", "btn redirect-btn-yes"],
         ["redirectNoBtn", t?.redirectNo ?? "Nein", "btn redirect-btn-no"],
