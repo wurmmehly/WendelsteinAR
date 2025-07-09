@@ -1,4 +1,4 @@
-const FAR = 0.05;
+//const FAR = 0.05;
 
 function setLanguage(lang) {
   localStorage.setItem("language", lang);
@@ -19,7 +19,8 @@ function showLanguageModal() {
 }
 
 function redirectToIndex() {
-  // findet aus, wie weit vom Fraunhofer der Benutzer ist
+  document.getElementById("redirect-modal").classList.add("hidden");
+  /* findet aus, wie weit vom Fraunhofer der Benutzer ist
   var deltaLon;
   var deltaLat;
   fetch("./resources/geoCoords.json")
@@ -44,8 +45,7 @@ function redirectToIndex() {
   if (deltaLon ** 2 + deltaLat ** 2 < FAR ** 2) {
     document.getElementById("redirect-modal").classList.add("hidden");
   } else {
-    redirectToOtherPage();
-  }
+    redirectToOtherPage();*/
 }
 
 function redirectToOtherPage() {
@@ -74,6 +74,7 @@ function updateContent(lang) {
       [
         ["title", t?.title ?? ""],
         ["description", t?.description ?? ""],
+        ["artutorial", t?.artutorial ?? ""],
         ["artitle", t?.artitle ?? ""],
         ["ardescription", t?.ardescription ?? ""],
         ["redirect", t?.redirect ?? ""],
@@ -93,6 +94,14 @@ function updateContent(lang) {
           "panorama",
           t?.panorama?.text ?? "panorama",
           t?.panorama?.class ?? "default-btn",
+        ],
+
+        [
+          "tutorial",
+
+          t?.tutorial?.text ?? "Tutorial",
+
+          t?.tutorial?.class ?? "default-btn",
         ],
         ["redirectYesBtn", t?.redirectYes ?? "Ja", "btn redirect-btn-yes"],
         ["redirectNoBtn", t?.redirectNo ?? "Nein", "btn redirect-btn-no"],
