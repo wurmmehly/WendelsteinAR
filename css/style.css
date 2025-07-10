@@ -290,9 +290,14 @@ body::before {
 }
 
 /* Für fraunhofer-sim */
+.aframe::before {
+  /* Entfernt das Hintergrundbild nur für A-Frame Seiten */
+  display: none !important;
+}
+
 .overlay {
   z-index: 999999999;
-  position: absolute;
+  position: fixed;
   left: 0;
   top: 0;
   width: 100vw;
@@ -307,6 +312,9 @@ body::before {
 }
 
 #readMoreContainer {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
   justify-content: center;
   align-items: last baseline;
 }
