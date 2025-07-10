@@ -1,25 +1,19 @@
 const RAD2DEG = 180 / Math.PI;
+const LANG = localStorage.getItem("language");
+const urlParams = new URLSearchParams(window.location.search);
+const locationName = urlParams.get("loc");
 
+var location;
+var FRAUNHOFER;
+
+// wie weit vom Teleskop Objekte im Himmel stehen sollen
 const CELESTIAL_SPHERE_RADIUS = 100;
+
+// wie weit das Teleskop hoch und runter drehen kann
 const MIN_ALT = 20;
 const MAX_ALT = 90;
 
-const urlParams = new URLSearchParams(window.location.search);
-var locationName = urlParams.get("loc");
-var location;
-var FRAUNHOFER;
-fetch("./resources/geoCoords.json")
-  .then((response) => response.json())
-  .then((geoCoords) => {
-    FRAUNHOFER = geoCoords.fraunhofer;
-
-    if (locationName in geoCoords) {
-      location = geoCoords[locationName];
-    }
-  });
-const LANG = localStorage.getItem("language");
-
-// wenn delta weniger als diesen Nummer ist, wird die Bewegung verworfen
+// wenn delta weniger als diesen Nummer ist, wird die Bewegung ignoriert
 const TINY_DELTA = 1e-6;
 
 // wie schnell das Teleskop dreht, wenn es sich selbst bewegt
@@ -27,6 +21,14 @@ const TELESCOPE_NATURAL_SPEED = 1;
 
 // wie schnell das Teleskop dreht, wenn man es bewegt
 const EASING = 1;
+
+const langPromise = fetch(`lang/${LANG}.json`).then((response) => response.json());
+const geoCoordsPromise = fetch("./resources/geoCoords.json").then((response) => response.json());
+const skyCoordsPromise = fetch("./resources/skyCoords.json").then((response) => response.json());
+
+// Globales Objekt für die Waypoints und deren Koordinaten
+var waypoints = {};
+var waypointAzAlt = {};
 
 function signOf(num) {
   return num < 0 ? -1 : 1;
@@ -51,20 +53,6 @@ function modulateRotation(degrees) {
   }
 
   return degrees;
-}
-
-function radec2azel(radec) {
-  var observation = new Orb.Observation({
-    observer: FRAUNHOFER,
-    target: radec,
-  });
-
-  var azalt = observation.azel(new Date());
-
-  return {
-    alt: azalt.elevation,
-    az: azalt.azimuth > 180 ? azalt.azimuth - 360 : azalt.azimuth,
-  };
 }
 
 function setAttributes(element, attributes) {
@@ -93,104 +81,73 @@ function animate(element, property, val, animationOverrides = {}) {
   element.setAttribute(`animation__${property}`, animationProps);
 }
 
-function emitReadMoreSignal() {
-  document.querySelector("a-camera").emit("readmore", {}, false);
-}
-
 AFRAME.registerComponent("load-sky", {
   init: function () {
-    this.waypointEls = {};
-    this.waypointRaycastableEls = [];
-    this.waypointCoords = {};
-
-    this.assets = document.querySelector("a-assets");
-    this.fraunhoferBeam = document.querySelector("#fraunhoferBeam");
-    this.primaryMirror = this.fraunhoferBeam.querySelector("#primaryMirror");
+    this.primaryMirror = document.querySelector("#primaryMirror");
 
     this.overlay = document.querySelector("#overlay");
     this.readMoreContainer = this.overlay.querySelector("#readMoreContainer");
 
-    this.langDictPromise = fetch(`lang/${LANG}.json`).then((response) =>
-      response.json()
-    );
+    this.openHologramPanel = this.openHologramPanel.bind(this);
+    this.highlightWaypoint = this.highlightWaypoint.bind(this);
+    this.closeHologramPanel = this.closeHologramPanel.bind(this);
 
-    this.objectInfoPromise = this.langDictPromise.then(
-      (langDict) => langDict.skyObjects
-    );
+    this.tickCount = 0;
 
-    fetch("./resources/geoCoords.json")
-      .then((response) => response.json())
-      .then((geoCoords) => {
-        setAttributes(this.el, {
-          position: {
-            x: 0,
-            y: geoCoords.fraunhofer.altitude + 3.209,
-            z: 0,
-          },
-          "gps-projected-entity-place": {
-            latitude: geoCoords.fraunhofer.latitude,
-            longitude: geoCoords.fraunhofer.longitude,
-          },
-        });
+    geoCoordsPromise.then((geoCoords) => {
+      setAttributes(this.el, {
+        position: {
+          x: 0,
+          y: geoCoords.fraunhofer.altitude + 3.209,
+          z: 0,
+        },
+        "gps-projected-entity-place": {
+          latitude: geoCoords.fraunhofer.latitude,
+          longitude: geoCoords.fraunhofer.longitude,
+        },
       });
+    });
 
-    // die Bilder laden; "Waypoints" in den Himmel hinzufügen
-    fetch("./resources/skyCoords.json")
-      .then((response) => response.json())
-      .then((skyCoords) => {
-        for (const [objectId, radecCoords] of Object.entries(skyCoords)) {
-          // lädt Bild
-          this.assets.append(
-            createElement("img", {
-              id: `${objectId}Image`,
-              src: `./images/objects/${objectId}.jpg`,
-              crossorigin: "anonymous",
-            })
-          );
+    skyCoordsPromise.then((skyCoords) => {
+      const assets = document.querySelector("a-assets");
+      for (const objectId of Object.keys(skyCoords)) {
+        this.addWaypoint(objectId, assets);
+      }
+      this.updateWaypointsPos();
+    });
 
-          this.waypointCoords[objectId] = radec2azel(radecCoords);
-          this.addWaypoint(objectId, this.waypointCoords[objectId]);
-        }
-
-        document
-          .querySelector("a-camera")
-          .emit("skyloaded", { waypointCoords: this.waypointCoords }, false);
-
-        // hört zu, wenn Waypoints geklickt werden
-        this.openHologramPanel = this.openHologramPanel.bind(this);
-        this.highlightWaypoint = this.highlightWaypoint.bind(this);
-        this.closeHologramPanel = this.closeHologramPanel.bind(this);
-        for (var waypointRaycastableEl of this.waypointRaycastableEls) {
-          waypointRaycastableEl.addEventListener(
-            "locked-on-waypoint",
-            this.openHologramPanel
-          );
-          waypointRaycastableEl.addEventListener(
-            "raycaster-intersected",
-            this.highlightWaypoint
-          );
-          waypointRaycastableEl.addEventListener(
-            "raycaster-intersected-cleared",
-            this.closeHologramPanel
-          );
-        }
-      });
+    document.querySelector("a-camera").emit("skyloaded", {}, false);
   },
 
-  // Fügt ein "waypoint" an der Position im Himmel hinzu
-  addWaypoint: function (objectId, altaz) {
+  tick: function () {
+    if (this.tickCount < 100) {
+      this.tickCount++;
+    } else {
+      this.updateWaypointsPos();
+      this.tickCount = 0;
+    }
+  },
+
+  // Erstellt einen Waypoint und fügt ihn zum Himmel hinzu
+  addWaypoint: function (objectId, assets) {
+    assets.append(
+      createElement("img", {
+        id: objectId + "Image",
+        src: `./images/objects/${objectId}.jpg`,
+        crossorigin: "anonymous",
+      })
+    );
+
     var waypointAzStick = createElement("a-entity", {
       id: `${objectId}WaypointAzStick`,
-      rotation: { x: 0, y: -altaz.az, z: 0 },
     });
 
     var waypointAltStick = createElement("a-entity", {
       id: `${objectId}WaypointAltStick`,
-      rotation: { x: altaz.alt, y: 0, z: 0 },
     });
 
-    var waypointEl = createElement("a-entity", {
-      id: `${objectId}Waypoint`,
+    var waypointFrameEl = createElement("a-entity", {
+      id: objectId + "WaypointFrame",
       mixin: "waypointFrame",
       class: "waypoint",
       position: { x: 0, y: 0, z: -CELESTIAL_SPHERE_RADIUS },
@@ -201,7 +158,7 @@ AFRAME.registerComponent("load-sky", {
       material: { src: `#${objectId}Image` },
       mixin: "waypointImage",
     });
-    waypointEl.appendChild(waypointImageEl);
+    waypointFrameEl.appendChild(waypointImageEl);
 
     var waypointRaycastableEl = createElement("a-entity", {
       id: objectId,
@@ -210,19 +167,54 @@ AFRAME.registerComponent("load-sky", {
       position: { x: 0, y: 0, z: -CELESTIAL_SPHERE_RADIUS },
     });
 
-    this.objectInfoPromise.then((objectInfo) => {
-      waypointEl.appendChild(
-        this.createInfoHologram(objectId, objectInfo[objectId].name)
+    waypointRaycastableEl.addEventListener("locked-on-waypoint", this.openHologramPanel);
+    waypointRaycastableEl.addEventListener("raycaster-intersected", this.highlightWaypoint);
+    waypointRaycastableEl.addEventListener(
+      "raycaster-intersected-cleared",
+      this.closeHologramPanel
+    );
+
+    langPromise.then((langDict) => {
+      waypointFrameEl.appendChild(
+        this.createInfoHologram(objectId, langDict.skyObjects[objectId].name)
       );
     });
 
-    this.waypointEls[objectId] = waypointEl;
-    this.waypointRaycastableEls.push(waypointRaycastableEl);
+    waypoints[objectId] = {
+      frame: waypointFrameEl,
+      image: waypointImageEl,
+      raycastable: waypointRaycastableEl,
+      azStick: waypointAzStick,
+      altStick: waypointAltStick,
+    };
 
-    waypointAltStick.append(waypointEl);
+    waypointAltStick.append(waypointFrameEl);
     waypointAltStick.append(waypointRaycastableEl);
     waypointAzStick.append(waypointAltStick);
     this.el.append(waypointAzStick);
+  },
+
+  updateWaypointsPos: function () {
+    geoCoordsPromise.then((geoCoords) => {
+      skyCoordsPromise.then((skyCoords) => {
+        for (const [objectId, els] of Object.entries(waypoints)) {
+          observation = new Orb.Observation({
+            observer: geoCoords.fraunhofer,
+            target: skyCoords[objectId],
+          });
+          var azalt = observation.azel(new Date());
+
+          coords = {
+            alt: azalt.elevation,
+            az: azalt.azimuth > 180 ? azalt.azimuth - 360 : azalt.azimuth,
+          };
+
+          waypointAzAlt[objectId] = coords;
+          els.azStick.setAttribute("rotation", { x: 0, y: -coords.az, z: 0 });
+          els.altStick.setAttribute("rotation", { x: coords.alt, y: 0, z: 0 });
+        }
+      });
+    });
   },
 
   createInfoHologram: function (objectId, title) {
@@ -250,30 +242,27 @@ AFRAME.registerComponent("load-sky", {
       target: "_blank",
       rel: "noopener noreferrer",
     });
-    this.langDictPromise.then(
-      (langDict) => (readMoreEl.textContent = langDict.readmore)
-    );
+    langPromise.then((langDict) => {
+      readMoreEl.textContent = langDict.readmore;
+    });
 
     return readMoreEl;
   },
 
   highlightWaypoint: function (evt) {
-    animate(this.waypointEls[evt.target.id], "scale", {
+    animate(waypoints[evt.target.id].frame, "scale", {
       x: 1.2,
       y: 1.2,
       z: 1.2,
     });
-    animate(this.fraunhoferBeam, "radius-top", 60);
   },
 
   openHologramPanel: function (evt) {
-    var waypoint = this.waypointEls[evt.target.id];
-
-    for (var [objectId, coords] of Object.entries(this.waypointCoords)) {
+    for (const objectId of Object.keys(waypoints)) {
       if (objectId === evt.target.id) continue;
 
-      var otherWaypoint = this.waypointEls[objectId];
-      animate(otherWaypoint, "position", {
+      var otherWaypointFrame = waypoints[objectId].frame;
+      animate(otherWaypointFrame, "position", {
         x: 0,
         y: 0,
         z: -(CELESTIAL_SPHERE_RADIUS + 10),
@@ -282,26 +271,21 @@ AFRAME.registerComponent("load-sky", {
 
     this.primaryMirror.setAttribute("mirror-rays", { number: 4 });
 
-    animate(waypoint, "scale", { x: 1.5, y: 1.5, z: 1.5 });
-    waypoint
-      .querySelector(`#${evt.target.id}HologramPanel`)
-      .setAttribute("visible", "true");
+    var waypointFrame = waypoints[evt.target.id].frame;
+    animate(waypointFrame, "scale", { x: 1.5, y: 1.5, z: 1.5 });
+    waypointFrame.querySelector(`#${evt.target.id}HologramPanel`).setAttribute("visible", "true");
 
     var readMoreEl = this.overlay.querySelector("#readMore");
     if (readMoreEl) readMoreEl.remove();
-    this.readMoreContainer.appendChild(
-      this.createReadMoreButton(evt.target.id)
-    );
+    this.readMoreContainer.appendChild(this.createReadMoreButton(evt.target.id));
   },
 
   closeHologramPanel: function (evt) {
-    var waypoint = this.waypointEls[evt.target.id];
-
-    for (var [objectId, coords] of Object.entries(this.waypointCoords)) {
+    for (const objectId of Object.keys(waypoints)) {
       if (objectId === evt.target.id) continue;
 
-      var otherWaypoint = this.waypointEls[objectId];
-      animate(otherWaypoint, "position", {
+      var otherWaypointFrame = waypoints[objectId].frame;
+      animate(otherWaypointFrame, "position", {
         x: 0,
         y: 0,
         z: -CELESTIAL_SPHERE_RADIUS,
@@ -310,11 +294,10 @@ AFRAME.registerComponent("load-sky", {
 
     this.primaryMirror.setAttribute("mirror-rays", { number: 60 });
 
-    waypoint
-      .querySelector(`#${evt.target.id}HologramPanel`)
-      .setAttribute("visible", "false");
+    var waypointFrame = waypoints[evt.target.id].frame;
+    waypointFrame.querySelector(`#${evt.target.id}HologramPanel`).setAttribute("visible", "false");
 
-    animate(waypoint, "scale", { x: 1, y: 1, z: 1 });
+    animate(waypointFrame, "scale", { x: 1, y: 1, z: 1 });
 
     readMoreEl = this.readMoreContainer.querySelector("#readMore");
     if (readMoreEl) readMoreEl.remove();
@@ -326,9 +309,7 @@ AFRAME.registerComponent("telescope-control", {
     this.raycaster = this.el.components["raycaster"];
     this.fraunhoferRig = document.querySelector("#fraunhoferRig");
     this.fraunhoferTopPart = document.querySelector("#fraunhoferTopPart");
-    this.fraunhoferTelescopeRig = this.fraunhoferTopPart.querySelector(
-      "#fraunhoferTelescopeRig"
-    );
+    this.fraunhoferTelescopeRig = this.fraunhoferTopPart.querySelector("#fraunhoferTelescopeRig");
 
     this.currentRay = { alt: 0, az: 0 };
     this.previousRay = { alt: 0, az: 0 };
@@ -349,7 +330,6 @@ AFRAME.registerComponent("telescope-control", {
     });
 
     this.el.addEventListener("skyloaded", (evt) => {
-      this.waypointCoords = evt.detail.waypointCoords;
       this.closestWaypoint = this.getClosestWaypoint();
     });
   },
@@ -371,10 +351,7 @@ AFRAME.registerComponent("telescope-control", {
     const dirVec = this.raycaster.data.direction;
 
     return {
-      alt:
-        Math.asin(
-          dirVec.y / (dirVec.x ** 2 + dirVec.y ** 2 + dirVec.z ** 2) ** 0.5
-        ) * RAD2DEG,
+      alt: Math.asin(dirVec.y / (dirVec.x ** 2 + dirVec.y ** 2 + dirVec.z ** 2) ** 0.5) * RAD2DEG,
       az: Math.atan2(dirVec.x, -dirVec.z) * RAD2DEG,
     };
   },
@@ -418,12 +395,8 @@ AFRAME.registerComponent("telescope-control", {
 
   controlTelescope: function () {
     if (this.wasActive) {
-      this.updateTelescopeAltitude(
-        (this.currentRay.alt - this.previousRay.alt) * EASING
-      );
-      this.updateTelescopeAzimuth(
-        (this.currentRay.az - this.previousRay.az) * EASING
-      );
+      this.updateTelescopeAltitude((this.currentRay.alt - this.previousRay.alt) * EASING);
+      this.updateTelescopeAzimuth((this.currentRay.az - this.previousRay.az) * EASING);
     }
 
     this.previousRay = this.currentRay;
@@ -432,15 +405,13 @@ AFRAME.registerComponent("telescope-control", {
 
   moveTelescopeToClosestWaypoint: function () {
     deltaAlt = modulateRotation(
-      this.closestWaypoint.alt - this.currentTelescope.alt
+      waypointAzAlt[this.closestWaypoint].alt - this.currentTelescope.alt
     );
-    deltaAz = modulateRotation(
-      this.closestWaypoint.az - this.currentTelescope.az
-    );
+    deltaAz = modulateRotation(waypointAzAlt[this.closestWaypoint].az - this.currentTelescope.az);
 
     if (Math.abs(deltaAlt) < TINY_DELTA && Math.abs(deltaAz) < TINY_DELTA) {
       this.lockedOnWaypoint = true;
-      this.closestWaypoint.el.emit("locked-on-waypoint", {}, false);
+      waypoints[this.closestWaypoint].raycastable.emit("locked-on-waypoint", {}, false);
     } else {
       this.updateTelescopeAltitude(deltaAlt, TELESCOPE_NATURAL_SPEED);
       this.updateTelescopeAzimuth(deltaAz, TELESCOPE_NATURAL_SPEED);
@@ -451,7 +422,7 @@ AFRAME.registerComponent("telescope-control", {
     closestWaypoint = null;
     closestDistance = 1000;
 
-    for (const [objectId, coords] of Object.entries(this.waypointCoords)) {
+    for (const [objectId, coords] of Object.entries(waypointAzAlt)) {
       if (coords.alt < MIN_ALT) continue;
 
       deltaAlt = modulateRotation(coords.alt - this.currentTelescope.alt);
@@ -460,18 +431,10 @@ AFRAME.registerComponent("telescope-control", {
       distance = (deltaAlt ** 2 + deltaAz ** 2) ** 0.5;
 
       if (distance < closestDistance) {
-        closestWaypoint = {
-          objectId: objectId,
-          alt: coords.alt,
-          az: coords.az,
-        };
+        closestWaypoint = objectId;
         closestDistance = distance;
       }
     }
-
-    closestWaypoint["el"] = document.querySelector(
-      `#${closestWaypoint.objectId}`
-    );
 
     return closestWaypoint;
   },
