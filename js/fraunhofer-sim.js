@@ -30,6 +30,21 @@ const skyCoordsPromise = fetch("./resources/skyCoords.json").then((response) => 
 var waypoints = {};
 var waypointAzAlt = {};
 
+function radec2azalt(radec, observer, time = null) {
+  observation = new Orb.Observation({
+    observer: observer,
+    target: radec,
+  });
+
+  if (!time) time = new Date();
+  var azalt = observation.azel(time);
+
+  return {
+    alt: azalt.elevation,
+    az: azalt.azimuth > 180 ? azalt.azimuth - 360 : azalt.azimuth,
+  };
+}
+
 function signOf(num) {
   return num < 0 ? -1 : 1;
 }
@@ -133,7 +148,7 @@ AFRAME.registerComponent("load-sky", {
     assets.append(
       createElement("img", {
         id: objectId + "Image",
-        src: `./images/objects/${objectId}.jpg`,
+        src: `./images/objects/${objectId}.webp`,
         crossorigin: "anonymous",
       })
     );
@@ -198,17 +213,7 @@ AFRAME.registerComponent("load-sky", {
     geoCoordsPromise.then((geoCoords) => {
       skyCoordsPromise.then((skyCoords) => {
         for (const [objectId, els] of Object.entries(waypoints)) {
-          observation = new Orb.Observation({
-            observer: geoCoords.fraunhofer,
-            target: skyCoords[objectId],
-          });
-          var azalt = observation.azel(new Date());
-
-          coords = {
-            alt: azalt.elevation,
-            az: azalt.azimuth > 180 ? azalt.azimuth - 360 : azalt.azimuth,
-          };
-
+          coords = radec2azalt(skyCoords[objectId], geoCoords.fraunhofer);
           waypointAzAlt[objectId] = coords;
           els.azStick.setAttribute("rotation", { x: 0, y: -coords.az, z: 0 });
           els.altStick.setAttribute("rotation", { x: coords.alt, y: 0, z: 0 });
