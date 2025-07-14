@@ -272,12 +272,10 @@ AFRAME.registerComponent("load-sky", {
   },
 
   createReadMoreButton: function (objectId) {
-    console.log(objectId);
     var readMoreEl = createElement("button", {
       id: "readMore",
       onclick: `readMore(${objectId})`,
     });
-    console.log(readMoreEl);
     langPromise.then((langDict) => {
       readMoreEl.textContent = langDict.readmore;
     });
