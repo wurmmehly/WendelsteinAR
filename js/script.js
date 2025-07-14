@@ -1,4 +1,4 @@
-// Hamburger MenÜ Links
+// Hamburger Menü Links
 const pages = [
   { key: "tour", url: "360tour.html" },
   { key: "location", url: "location.html" },
@@ -6,21 +6,26 @@ const pages = [
   { key: "sky", url: "fraunhofer-sim.html" },
 ];
 
-// Sprachwahl & Content
+// Hotspot Config
+const hotspotConfig = [
+  { slot: "hotspot-1", pos: "0 5 0", normal: "0 1 0", textKey: "hotspot1" },
+  { slot: "hotspot-2", pos: "2 3 1", normal: "0 1 0", textKey: "hotspot2" },
+  { slot: "hotspot-3", pos: "-2 3 2", normal: "0 1 0", textKey: "hotspot3" },
+  { slot: "hotspot-4", pos: "1 2 -2", normal: "0 1 0", textKey: "hotspot4" },
+];
+
+let hotspotTexts = {};
+let closeText = "Schließen"; // Fallback
+
 function setLanguage(lang) {
   localStorage.setItem("language", lang);
   document.documentElement.lang = lang;
   updateContent(lang);
 
-  // Sprachmodal ausblenden
   document.getElementById("language-modal").classList.add("hidden");
-
-  // Nach kurzer Verzögerung das zweite Modal anzeigen
   setTimeout(function () {
     document.getElementById("redirect-modal").classList.remove("hidden");
   }, 250);
-
-  // Hamburger-Menü aktualisieren
   renderHamburgerMenu(lang, getCurrentPageKey());
 }
 
@@ -30,33 +35,6 @@ function showLanguageModal() {
 
 function redirectToIndex() {
   document.getElementById("redirect-modal").classList.add("hidden");
-  /* Geolokalisierungs-Logik ggf. wieder aktivieren
-  var deltaLon;
-  var deltaLat;
-  fetch("./resources/geoCoords.json")
-    .then((response) => response.json())
-    .then((geoCoords) => {
-      navigator.geolocation.getCurrentPosition(
-        (loc) => {
-          deltaLat = Math.abs(
-            loc.coords.latitude - geoCoords.fraunhofer.latitude
-          );
-          deltaLon = Math.abs(
-            loc.coords.longitude - geoCoords.fraunhofer.longitude
-          );
-        },
-        (err) => {
-          deltaLat = deltaLon = 1000;
-        }
-      );
-    });
-
-  if (deltaLon ** 2 + deltaLat ** 2 < FAR ** 2) {
-    document.getElementById("redirect-modal").classList.add("hidden");
-  } else {
-    redirectToOtherPage();
-  }
-  */
 }
 
 function redirectToOtherPage() {
@@ -123,10 +101,42 @@ function updateContent(lang) {
           el.className = cls;
         }
       });
+
+      hotspotTexts = t?.hotspots || {};
+      closeText = t?.close || "Schließen";
+      updateHotspots();
     });
 }
 
-//Menu Funktionen
+// Hotspots dynamisch erzeugen
+function updateHotspots() {
+  const modelViewer = document.getElementById("model-viewer");
+  if (!modelViewer) return;
+
+  //Hotspots entfernen
+  Array.from(modelViewer.querySelectorAll('button[slot^="hotspot-"]')).forEach(
+    (btn) => btn.remove()
+  );
+
+  //Hotspots erzeugen
+  hotspotConfig.forEach(({ slot, pos, normal, textKey }) => {
+    const btn = document.createElement("button");
+    btn.setAttribute("slot", slot);
+    btn.setAttribute("data-position", pos);
+    btn.setAttribute("data-normal", normal);
+    btn.style =
+      "background: #00883A; border-radius: 50%; width: 32px; height: 32px; border: none; cursor: pointer;";
+    btn.onclick = function () {
+      document.getElementById("hotspot-text").textContent =
+        hotspotTexts[textKey] || "";
+      document.getElementById("hotspot-close").textContent = closeText;
+      document.getElementById("hotspot-popup").style.display = "block";
+    };
+    modelViewer.appendChild(btn);
+  });
+}
+
+// Menu Funktionen
 function getCurrentPageKey() {
   const file = window.location.pathname.split("/").pop();
   if (file === "360tour.html") return "tour";

@@ -6,24 +6,21 @@
     <title>Wendelstein Digital - Modell</title>
     <link href="css/style.css" rel="stylesheet">
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <script src="js/script.js" type="text/javascript"></script>
 </head>
 
 <body>
-    <div id="hotspot-popup">
-        <span id="hotspot-text"></span><br />
-        <button onclick="document.getElementById('hotspot-popup').style.display='none'">Schließen</button>
+    <div id="hamburger-menu" class="hamburger-menu">
+        <button id="menu-toggle" aria-label="Menü öffnen">&#9776;</button>
+        <nav id="menu-nav" class="menu-nav hidden"></nav>
     </div>
-    <div id="hotspot-popup">
+    <div id="hotspot-popup" style="display:none;">
         <span id="hotspot-text"></span><br />
-        <button onclick="document.getElementById('hotspot-popup').style.display='none'">Schließen</button>
+        <button id="hotspot-close"
+            onclick="document.getElementById('hotspot-popup').style.display='none'">Schließen</button>
     </div>
-    <model-viewer src="models/fraunhofer/fraunhofer.glb" camera-controls interaction-prompt="none"
+    <model-viewer id="model-viewer" src="models/fraunhofer/fraunhofer.glb" camera-controls interaction-prompt="none"
         style="background: transparent;" exposure="1" shadow-intensity="1" ar>
-        <!-- Hotspot mit Popup -->
-        <button slot="hotspot-1" data-position="0 5 0" data-normal="0 1 0"
-            style="background: red; border-radius: 50%; width: 32px; height: 32px; border: none; cursor: pointer;"
-            onclick="document.getElementById('hotspot-text').textContent='Test';document.getElementById('hotspot-popup').style.display='block';">
-        </button>
     </model-viewer>
 </body>
 
