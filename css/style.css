@@ -290,9 +290,17 @@ body::before {
 }
 
 /* Für fraunhofer-sim */
+body.aframe {
+  position: static !important;
+}
+
 .aframe::before {
   /* Entfernt das Hintergrundbild nur für A-Frame Seiten */
   display: none !important;
+}
+
+iframe {
+  border: none;
 }
 
 .overlay {
