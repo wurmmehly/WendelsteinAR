@@ -24,7 +24,7 @@ function setLanguage(lang) {
 
   document.getElementById("language-modal").classList.add("hidden");
   setTimeout(function () {
-    document.getElementById("redirect-modal").classList.remove("hidden");
+    document.getElementById("consent-modal").classList.remove("hidden");
   }, 250);
   renderHamburgerMenu(lang, getCurrentPageKey());
 }
@@ -49,11 +49,13 @@ window.onload = function () {
   if (!lang) {
     document.getElementById("language-modal").classList.remove("hidden");
     document.getElementById("redirect-modal").classList.add("hidden");
+    document.getElementById("consent-modal").classList.add("hidden");
   } else {
     document.documentElement.lang = lang;
     updateContent(lang);
-    document.getElementById("redirect-modal").classList.remove("hidden");
+    document.getElementById("redirect-modal").classList.add("hidden");
     document.getElementById("language-modal").classList.add("hidden");
+    document.getElementById("consent-modal").classList.remove("hidden");
   }
 };
 
@@ -101,6 +103,17 @@ function updateContent(lang) {
           el.className = cls;
         }
       });
+
+      if (t?.consent) {
+        document.getElementById("consent-title").textContent =
+          t.consent.title || "";
+        document.getElementById("consent-text").innerHTML =
+          t.consent.text || "";
+        document.getElementById("consent-checkbox-label").innerHTML =
+          t.consent.checkbox || "";
+        document.getElementById("consent-btn").textContent =
+          t.consent.button || "";
+      }
 
       hotspotTexts = t?.hotspots || {};
       closeText = t?.close || "Schließen";
@@ -181,6 +194,19 @@ document.addEventListener("DOMContentLoaded", function () {
       if (e.target.tagName === "A") {
         menuNav.classList.add("hidden");
       }
+    });
+  }
+
+  // Consent
+  const consentCheckbox = document.getElementById("consent-checkbox");
+  const consentBtn = document.getElementById("consent-btn");
+  if (consentCheckbox && consentBtn) {
+    consentCheckbox.addEventListener("change", function () {
+      consentBtn.disabled = !this.checked;
+    });
+    consentBtn.addEventListener("click", function () {
+      document.getElementById("consent-modal").classList.add("hidden");
+      document.getElementById("redirect-modal").classList.remove("hidden");
     });
   }
 });

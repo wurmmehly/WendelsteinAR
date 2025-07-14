@@ -3,6 +3,12 @@
   "redirect": "Allow access to camera and location?",
   "redirectYes": "Yes",
   "redirectNo": "No",
+  "consent": {
+    "title": "Notice",
+    "text": "Please accept the terms to continue.",
+    "checkbox": "I accept the <a href=\"datenschutz.html\" target=\"_blank\">terms</a>",
+    "button": "Continue"
+  },
   "description": "Here you have the opportunity to explore various parts of the observatory with the help of your smartphone. On the following map you can see points where you can take a look at the observatory's 2m telescope using augmented reality (AR). In addition, there are further sections that can be viewed in more detail from any location on your smartphone.",
   "artutorial": "No experience with AR? Then use our tutorial!",
   "hotspots": {

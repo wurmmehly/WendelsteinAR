@@ -10,7 +10,7 @@
 </head>
 
 <body>
-    <!-- 1. Sprachauswahl-Modal -->
+    <!-- Sprachauswahl-Modal -->
     <div id="language-modal" class="modal">
         <div class="modal-content">
             <h2>Sprache wählen / Choose language</h2>
@@ -19,7 +19,22 @@
         </div>
     </div>
 
-    <!-- 2. Weiterleitungs-Modal -->
+    <!-- Datenschutz-Modal -->
+    <div id="consent-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2 id="consent-title"></h2>
+            <p id="consent-text"></p>
+            <label>
+                <input type="checkbox" id="consent-checkbox">
+                <span id="consent-checkbox-label"></span>
+            </label>
+            <br>
+            <button id="consent-btn" class="btn" disabled></button>
+        </div>
+    </div>
+
+
+    <!-- Weiterleitungs-Modal -->
     <div id="redirect-modal" class="modal hidden">
         <div class="modal-content">
             <h2 id="redirect"></h2>
