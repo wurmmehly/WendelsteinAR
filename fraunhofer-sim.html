@@ -53,7 +53,9 @@
     <!-- Kamera nutzt echte GPS-Position des Geräts -->
     <!-- Dieses Cursor kann beim Klick das Info-Panel schließen -->
     <a-camera id="camera" look-controls="pointerLockEnabled: true" cursor="rayOrigin: mouse" raycaster="objects: none"
-      telescope-control camera-gps camera-controls></a-camera>
+      telescope-control camera-gps camera-controls>
+      <a-plane id="fader" color="#333333" opacity=".5" visible="false" position="0 0 -1e-3"></a-plane>
+    </a-camera>
 
     <a-entity load-sky id="celestialSphere"></a-entity>
 

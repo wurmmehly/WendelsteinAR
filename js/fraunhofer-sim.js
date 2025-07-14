@@ -97,6 +97,8 @@ function animate(element, property, val, animationOverrides = {}) {
 }
 
 function readMore(object) {
+  document.querySelector("#fader").setAttribute("visible", true);
+
   infoPanelContainer = document.querySelector("#infoPanelContainer");
   infoPanelContainer.append(
     createElement("iframe", {
@@ -118,6 +120,7 @@ function closeInfoPanel() {
   if (infoPanel) infoPanel.remove();
   closeInfoPanelButton = document.querySelector("#closeInfoPanel");
   if (closeInfoPanelButton) closeInfoPanelButton.remove();
+  document.querySelector("#fader").setAttribute("visible", false);
 }
 
 AFRAME.registerComponent("load-sky", {
