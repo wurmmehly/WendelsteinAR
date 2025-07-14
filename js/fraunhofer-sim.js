@@ -96,6 +96,30 @@ function animate(element, property, val, animationOverrides = {}) {
   element.setAttribute(`animation__${property}`, animationProps);
 }
 
+function readMore(object) {
+  infoPanelContainer = document.querySelector("#infoPanelContainer");
+  infoPanelContainer.append(
+    createElement("iframe", {
+      id: "infoPanel",
+      src: "./object.html?id=" + object.id,
+    })
+  );
+
+  closeInfoPanelButton = createElement("button", {
+    id: "closeInfoPanel",
+    onclick: "closeInfoPanel()",
+  });
+  closeInfoPanelButton.innerText = "X";
+  infoPanelContainer.append(closeInfoPanelButton);
+}
+
+function closeInfoPanel() {
+  infoPanel = document.querySelector("#infoPanel");
+  if (infoPanel) infoPanel.remove();
+  closeInfoPanelButton = document.querySelector("#closeInfoPanel");
+  if (closeInfoPanelButton) closeInfoPanelButton.remove();
+}
+
 AFRAME.registerComponent("load-sky", {
   init: function () {
     this.primaryMirror = document.querySelector("#primaryMirror");
@@ -240,13 +264,12 @@ AFRAME.registerComponent("load-sky", {
   },
 
   createReadMoreButton: function (objectId) {
-    var readMoreEl = createElement("a", {
+    console.log(objectId);
+    var readMoreEl = createElement("button", {
       id: "readMore",
-      class: "button",
-      href: "./object.html?id=" + objectId,
-      target: "_blank",
-      rel: "noopener noreferrer",
+      onclick: `readMore(${objectId})`,
     });
+    console.log(readMoreEl);
     langPromise.then((langDict) => {
       readMoreEl.textContent = langDict.readmore;
     });
@@ -303,6 +326,8 @@ AFRAME.registerComponent("load-sky", {
     waypointFrame.querySelector(`#${evt.target.id}HologramPanel`).setAttribute("visible", "false");
 
     animate(waypointFrame, "scale", { x: 1, y: 1, z: 1 });
+
+    closeInfoPanel();
 
     readMoreEl = this.readMoreContainer.querySelector("#readMore");
     if (readMoreEl) readMoreEl.remove();
