@@ -340,12 +340,17 @@ button {
   pointer-events: all;
 }
 
+#infoPanelContainer {
+  align-items: center;
+}
+
 #infoPanel {
   display: block;
   position: fixed;
-  top: 0;
-  width: 80vw;
-  height: 100%;
+  border-radius: 10px;
+  top: 25px;
+  width: calc(100% - 50px);
+  height: calc(100% - 50px);
   z-index: 9999;
   pointer-events: all;
 }
