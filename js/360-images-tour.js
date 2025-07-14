@@ -12,7 +12,6 @@ const scenes = {
         type: "page",
       },
     ],
-    description: "Wasser",
   },
   "images/test2.jpg": {
     hotspots: [
@@ -27,7 +26,6 @@ const scenes = {
         type: "image",
       },
     ],
-    description: "Winter",
   },
   "images/test3.jpg": {
     hotspots: [
@@ -37,7 +35,6 @@ const scenes = {
         type: "image",
       },
     ],
-    description: "Berggipfel",
   },
 };
 
@@ -97,5 +94,4 @@ function createSceneSelector() {
 
 document.addEventListener("DOMContentLoaded", () => {
   createHotspots("images/test1.jpg");
-  createSceneSelector(); // Schnellauswahl erstellen
 });
