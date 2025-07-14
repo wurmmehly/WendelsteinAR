@@ -133,19 +133,27 @@ AFRAME.registerComponent("load-sky", {
 
     this.tickCount = 0;
 
-    geoCoordsPromise.then((geoCoords) => {
-      setAttributes(this.el, {
-        position: {
-          x: 0,
-          y: geoCoords.fraunhofer.altitude + 3.209,
-          z: 0,
-        },
-        "gps-projected-entity-place": {
-          latitude: geoCoords.fraunhofer.latitude,
-          longitude: geoCoords.fraunhofer.longitude,
-        },
+    if (locationName) {
+      geoCoordsPromise.then((geoCoords) => {
+        setAttributes(this.el, {
+          position: {
+            x: 0,
+            y: geoCoords.fraunhofer.altitude + 3.209,
+            z: 0,
+          },
+          "gps-projected-entity-place": {
+            latitude: geoCoords.fraunhofer.latitude,
+            longitude: geoCoords.fraunhofer.longitude,
+          },
+        });
       });
-    });
+    } else {
+      this.el.setAttribute("position", {
+        x: 0,
+        y: 3.209,
+        z: -10,
+      });
+    }
 
     skyCoordsPromise.then((skyCoords) => {
       const assets = document.querySelector("a-assets");
@@ -362,6 +370,10 @@ AFRAME.registerComponent("telescope-control", {
     this.el.addEventListener("skyloaded", (evt) => {
       this.closestWaypoint = this.getClosestWaypoint();
     });
+
+    if (locationName) {
+      this.fraunhoferRig.setAttribute("telescope-gps", "");
+    }
   },
 
   tick: function () {
