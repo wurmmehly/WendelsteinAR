@@ -18,6 +18,30 @@
     "hotspot4": "Text for Hotspot 4"
   },
   "close": "Close",
+  "quizBanner": {
+    "text": "This page is part of a study. Take our short quiz at the end!",
+    "button": "Go to quiz"
+  },
+  "quiz": {
+    "result": "You got {{score}} out of {{total}} correct!",
+    "questions": [
+      {
+        "text": "Which building can be seen on the Wendelstein?",
+        "answers": [
+          "Weather station",
+          "Observatory",
+          "Mountain Rescue Station",
+          "Hotel"
+        ],
+        "correct": 1
+      },
+      {
+        "text": "How many mirrors does the 2m telescope have?",
+        "answers": ["1", "2", "3", "4"],
+        "correct": 2
+      }
+    ]
+  },
   "panorama": {
     "text": "Start",
     "class": "panorama-btn"

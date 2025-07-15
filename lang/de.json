@@ -18,6 +18,25 @@
     "hotspot4": "Text für Hotspot 4"
   },
   "close": "Schließen",
+  "quizBanner": {
+    "text": "Diese Seite ist Teil einer Studie. Nehmen Sie an Ende an unserem kurzen Quiz teil!",
+    "button": "Zum Quiz"
+  },
+  "quiz": {
+    "result": "Du hast {{score}} von {{total}} richtig!",
+    "questions": [
+      {
+        "text": "Welches Gebäude ist auf dem Wendelstein zu sehen?",
+        "answers": ["Wetterstation", "Observatorium", "Bergrettung", "Hotel"],
+        "correct": 1
+      },
+      {
+        "text": "Wie viele Spiegel besitzt das 2m Teleskop?",
+        "answers": ["1", "2", "3", "4"],
+        "correct": 2
+      }
+    ]
+  },
   "panorama": {
     "text": "Start",
     "class": "panorama-btn"
