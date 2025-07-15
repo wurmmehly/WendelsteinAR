@@ -210,16 +210,10 @@ document.addEventListener("DOMContentLoaded", function () {
         .then((r) => r.json())
         .then((t) => {
           const bannerText = document.getElementById("quiz-banner-text");
-          const bannerBtn = document.getElementById("quiz-banner-btn");
           if (bannerText) {
-            bannerText.textContent =
-              t.quizBanner?.text || "Teste dein Wissen im Quiz!";
-          }
-          if (bannerBtn) {
-            bannerBtn.textContent = t.quizBanner?.button || "Zum Quiz";
-            bannerBtn.addEventListener("click", () => {
-              window.location.href = "quiz.html";
-            });
+            bannerText.innerHTML =
+              t.quizBanner?.text ||
+              `Teste dein Wissen im <a href="quiz.html">Quiz</a>!`;
           }
         });
     }

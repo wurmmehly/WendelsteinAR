@@ -19,8 +19,7 @@
   },
   "close": "Schließen",
   "quizBanner": {
-    "text": "Diese Seite ist Teil einer Studie. Nehmen Sie an Ende an unserem kurzen Quiz teil!",
-    "button": "Zum Quiz"
+    "text": "Diese Seite ist Teil einer Studie. Nimm am <a href='quiz.html'>Quiz</a> teil!"
   },
   "quiz": {
     "result": "Du hast {{score}} von {{total}} richtig!",

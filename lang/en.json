@@ -19,8 +19,7 @@
   },
   "close": "Close",
   "quizBanner": {
-    "text": "This page is part of a study. Take our short quiz at the end!",
-    "button": "Go to quiz"
+    "text": "This page is part of a study. Join the <a href='quiz.html'>quiz</a>!"
   },
   "quiz": {
     "result": "You got {{score}} out of {{total}} correct!",

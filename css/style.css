@@ -409,6 +409,19 @@ model-viewer {
   #quiz-feedback {
     padding: 1.2em;
   }
+
+  .quiz-banner {
+    padding: 6px 10px !important;
+    font-size: 1.1em !important;
+    min-height: unset !important;
+    height: auto !important;
+  }
+
+  .quiz-banner span,
+  .quiz-banner a {
+    font-size: 0.9em;
+    line-height: 1.2;
+  }
 }
 
 /* Für fraunhofer-sim */
