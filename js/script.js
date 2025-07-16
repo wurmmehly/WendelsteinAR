@@ -65,6 +65,12 @@ function updateContent(lang) {
   fetch(`lang/${lang}.json?cb=${cacheBuster}`)
     .then((response) => response.json())
     .then((t) => {
+      if (t?.privacy) {
+        const privacyTitle = document.getElementById("privacy-title");
+        const privacyContent = document.getElementById("privacy-content");
+        if (privacyTitle) privacyTitle.textContent = t.privacy.title ?? "";
+        if (privacyContent) privacyContent.innerHTML = t.privacy.content ?? "";
+      }
       [
         ["title", t?.title ?? ""],
         ["description", t?.description ?? ""],

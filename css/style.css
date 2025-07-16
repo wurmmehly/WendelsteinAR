@@ -365,6 +365,24 @@ model-viewer {
   text-align: center;
 }
 
+#privacy-content {
+  padding: 2em;
+  margin: 2em auto;
+  max-width: 800px;
+  font-size: 1.1em;
+  line-height: 1.6;
+  border-radius: 12px;
+  color: white;
+}
+
+#privacy-title {
+  text-align: center;
+  margin-top: 100px;
+  font-size: 2em;
+  font-weight: bold;
+  color: white;
+}
+
 /* Responsive Anpassungen für kleine Bildschirme*/
 @media (max-width: 600px) {
   body {
