@@ -5,7 +5,7 @@
   "redirectNo": "No",
   "consent": {
     "title": "Notice",
-    "text": "Please accept the terms to continue.",
+    "text": "The following sites are part of are study conducted by LMU Munich. Please accept the <a href=\"datenschutz.html\" target=\"_blank\">terms</a> to continue. <br> Please also take part in the quiz at the end of your visit to our site.",
     "checkbox": "I accept the <a href=\"datenschutz.html\" target=\"_blank\">terms</a>",
     "button": "Continue"
   },

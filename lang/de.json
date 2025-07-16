@@ -5,7 +5,7 @@
   "redirectNo": "Nein",
   "consent": {
     "title": "Hinweis",
-    "text": "Bitte akzeptieren Sie die Bedingungen um fortzufahren.",
+    "text": "Die folgenden Seiten sind Teil einer Studie der LMU München. Bitte akzeptieren Sie die <a href=\"datenschutz.html\" target=\"_blank\">Bedingungen</a> um fortzufahren. <br> Bitte nehmen Sie zusätzlich am Ende Ihres Besuchs unserer Seite am Quiz teil.",
     "checkbox": "Ich akzeptiere die <a href=\"datenschutz.html\" target=\"_blank\">Bedingungen</a>",
     "button": "Weiter"
   },
