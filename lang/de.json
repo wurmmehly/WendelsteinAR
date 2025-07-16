@@ -25,13 +25,83 @@
     "result": "Du hast {{score}} von {{total}} richtig!",
     "questions": [
       {
+        "text": "Was ist Astronomie?",
+        "answers": [
+          "Sternenkunde",
+          "Deutung astrologischer Ereignisse",
+          "Lerne des Sternenzeichnens",
+          "Wissenschaft des Klimas"
+        ],
+        "correct": 0
+      },
+      {
         "text": "Welches Gebäude ist auf dem Wendelstein zu sehen?",
         "answers": ["Wetterstation", "Observatorium", "Bergrettung", "Hotel"],
         "correct": 1
       },
       {
+        "text": "Was ist der Hauptzweck der Einrichtung? ",
+        "answers": [
+          "Forschung",
+          "Unterhaltung",
+          "Öffentlichkeits Arbeit",
+          "Fotografie"
+        ],
+        "correct": 0
+      },
+      {
+        "text": "Was ist ein wichtiger Bestandteil des 2m Teleskops?",
+        "answers": ["Objektiv", "Stativ", "Sucher", "Kühlung"],
+        "correct": 3
+      },
+      {
         "text": "Wie viele Spiegel besitzt das 2m Teleskop?",
         "answers": ["1", "2", "3", "4"],
+        "correct": 2
+      },
+      {
+        "text": "Was ist der Unterschied zwischen Sternen und Planeten?",
+        "answers": [
+          "Sterne leuchten selbst, Planeten reflektieren Licht",
+          "Sterne reflektieren Licht, Planeten leuchten selbst",
+          "Sterne reflektieren das Licht der Planeten",
+          "Sterne und Planeten leuchten beide von selbst"
+        ],
+        "correct": 0
+      },
+      {
+        "text": "Welche Lichtfarbe haben junge Sterne?",
+        "answers": ["Grün", "Rot", "Gelb", "Blau"],
+        "correct": 3
+      },
+      {
+        "text": "Welche Temperatur hat der Orion Nebel?",
+        "answers": [
+          "etwa 100 Grad",
+          "etwa 1000 Grad",
+          "etwa 10000 Grad",
+          "etwa 100000 Grad"
+        ],
+        "correct": 2
+      },
+      {
+        "text": "Was bedeutet die Farbe Gelb im Bezug auf das Alter der Sterne?",
+        "answers": [
+          "So alt wie die Sonne",
+          "Realtiv jung",
+          "So alt wie die Erde",
+          "Älter als die Sonne"
+        ],
+        "correct": 0
+      },
+      {
+        "text": "Zu was führt die Bewegung in Messier 51?",
+        "answers": [
+          "Schwarzes Loch",
+          "Sonnenstürme",
+          "Verschmelzung der Galaxien",
+          "Schwerkraft"
+        ],
         "correct": 2
       }
     ]
