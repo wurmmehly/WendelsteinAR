@@ -18,6 +18,99 @@
     "hotspot4": "Text for Hotspot 4"
   },
   "close": "Close",
+  "quizBanner": {
+    "text": "This page is part of a study. Join the <a href='quiz.html'>quiz</a>!"
+  },
+  "quiz": {
+    "result": "You got {{score}} out of {{total}} correct!",
+    "questions": [
+      {
+        "text": "What is astronomy?",
+        "answers": [
+          "Science of Stars",
+          "Interpretation of astrological events",
+          "Course to learn drawing stars",
+          "Science of climate"
+        ],
+        "correct": 1
+      },
+      {
+        "text": "Which building can be seen on the Wendelstein?",
+        "answers": [
+          "Weather station",
+          "Observatory",
+          "Mountain Rescue Station",
+          "Hotel"
+        ],
+        "correct": 1
+      },
+      {
+        "text": "What is the main purpose of the facility?",
+        "answers": [
+          "Research",
+          "Entertainment",
+          "Public relations",
+          "Photography"
+        ],
+        "correct": 0
+      },
+      {
+        "text": "What is an important part of the 2m telescope?",
+        "answers": ["Objective", "Tripod", "Viewfinder", "Cooling"],
+        "correct": 3
+      },
+      {
+        "text": "How many mirrors does the 2m telescope have?",
+        "answers": ["1", "2", "3", "4"],
+        "correct": 2
+      },
+      {
+        "text": "What is the difference between stars and planets?",
+        "answers": [
+          "Stars shine by themselves, planets reflect light",
+          "Stars reflect light, planets shine by themselves",
+          "Stars reflect the light of planets",
+          "Stars and planets both shine by themselves"
+        ],
+        "correct": 0
+      },
+      {
+        "text": "What color light do young stars have?",
+        "answers": ["Green", "Red", "Yellow", "Blue"],
+        "correct": 0
+      },
+      {
+        "text": "What is the temperature of the Orion Nebula?",
+        "answers": [
+          "about 100 degrees",
+          "about 1000 degrees",
+          "about 10000 degrees",
+          "about 100000 degrees"
+        ],
+        "correct": 0
+      },
+      {
+        "text": "What does the color yellow mean in relation to the age of the stars?",
+        "answers": [
+          "As old as the sun",
+          "Realtively young",
+          "As old as the earth",
+          "Older than the sun"
+        ],
+        "correct": 0
+      },
+      {
+        "text": "What does the movement in Messier 51 lead to?",
+        "answers": [
+          "Black hole",
+          "Solar storms",
+          "Merging of galaxies",
+          "Gravity"
+        ],
+        "correct": 0
+      }
+    ]
+  },
   "panorama": {
     "text": "Start",
     "class": "panorama-btn"

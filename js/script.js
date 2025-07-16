@@ -185,6 +185,7 @@ function renderHamburgerMenu(lang, currentPageKey) {
 document.addEventListener("DOMContentLoaded", function () {
   const menuToggle = document.getElementById("menu-toggle");
   const menuNav = document.getElementById("menu-nav");
+
   if (menuToggle && menuNav) {
     menuToggle.addEventListener("click", () => {
       menuNav.classList.toggle("hidden");
@@ -195,6 +196,27 @@ document.addEventListener("DOMContentLoaded", function () {
         menuNav.classList.add("hidden");
       }
     });
+  }
+
+  // Quiz Banner einblenden
+  const currentFile = window.location.pathname.split("/").pop();
+  if (currentFile !== "quiz.html") {
+    const banner = document.getElementById("quiz-banner");
+    if (banner) {
+      banner.classList.remove("hidden");
+
+      const lang = localStorage.getItem("language") || "de";
+      fetch(`lang/${lang}.json?cb=${Date.now()}`)
+        .then((r) => r.json())
+        .then((t) => {
+          const bannerText = document.getElementById("quiz-banner-text");
+          if (bannerText) {
+            bannerText.innerHTML =
+              t.quizBanner?.text ||
+              `Teste dein Wissen im <a href="quiz.html">Quiz</a>!`;
+          }
+        });
+    }
   }
 
   // Consent
