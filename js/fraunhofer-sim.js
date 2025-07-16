@@ -1,4 +1,5 @@
 const RAD2DEG = 180 / Math.PI;
+const DEG2RAD = 1 / RAD2DEG;
 const LANG = localStorage.getItem("language");
 const urlParams = new URLSearchParams(window.location.search);
 const locationName = urlParams.get("loc");
@@ -6,11 +7,22 @@ const locationName = urlParams.get("loc");
 var location;
 var FRAUNHOFER;
 
+// RA & Dec für die Mitte der Galaxie und
+// Diese werden benutzt den Himmel zu orientieren
+galacticCenterRaDec = {
+  ra: 17.76033255266667, // dezimalle Stunden
+  dec: -28.93617776, // dezimalle Grade
+};
+longitude90RaDec = {
+  ra: 21.20029210066667, // dezimalle Stunden
+  dec: 48.32963721, // dezimalle Grade
+};
+
 // wie weit vom Teleskop Objekte im Himmel stehen sollen
-const CELESTIAL_SPHERE_RADIUS = 100;
+const CELESTIAL_SPHERE_RADIUS = 400;
 
 // wie weit das Teleskop hoch und runter drehen kann
-const MIN_ALT = 20;
+const MIN_ALT = 0;
 const MAX_ALT = 90;
 
 // wenn delta weniger als diesen Nummer ist, wird die Bewegung ignoriert
@@ -22,6 +34,7 @@ const TELESCOPE_NATURAL_SPEED = 1;
 // wie schnell das Teleskop dreht, wenn man es bewegt
 const EASING = 1;
 
+// lädt Promises für jede Datei
 const langPromise = fetch(`lang/${LANG}.json`).then((response) => response.json());
 const geoCoordsPromise = fetch("./resources/geoCoords.json").then((response) => response.json());
 const skyCoordsPromise = fetch("./resources/skyCoords.json").then((response) => response.json());
@@ -30,6 +43,7 @@ const skyCoordsPromise = fetch("./resources/skyCoords.json").then((response) => 
 var waypoints = {};
 var waypointAzAlt = {};
 
+// WICHTIG: RA muss in dezimallen Stunden sein und Dec muss in dezimallen Graden sein
 function radec2azalt(radec, observer, time = null) {
   observation = new Orb.Observation({
     observer: observer,
@@ -43,6 +57,34 @@ function radec2azalt(radec, observer, time = null) {
     alt: azalt.elevation,
     az: azalt.azimuth > 180 ? azalt.azimuth - 360 : azalt.azimuth,
   };
+}
+
+// Umrechnet Koordinaten von Azimut und Elevation nach kartesisch Koordinaten (wie A-Frame)
+function azalt2xyz(azalt, r) {
+  const altitudeRadius = r * Math.cos(azalt.az * DEG2RAD);
+  return {
+    x: altitudeRadius * Math.sin(azalt.az * DEG2RAD),
+    y: r * Math.sin(azalt.alt * DEG2RAD),
+    z: -altitudeRadius * Math.cos(azalt.az * DEG2RAD),
+  };
+}
+
+// Rechnet den Betrag eines Vektores
+function magnitude(vec) {
+  return (vec.x ** 2 + vec.y ** 2 + vec.z ** 2) ** 0.5;
+}
+
+// Rechnet das Punktprodukt für 2 Vektoren
+function dot(vec1, vec2) {
+  return vec1.x * vec2.x + vec1.y * vec2.y + vec1.z * vec2.z;
+}
+
+// Benutzt das Punktprodukt, um den Winkel zwischen 2 Vektoren zu rechnen
+// Rückwert in Grad
+function angleBetweenVectors(vec1, vec2) {
+  console.log("dot", dot(vec1, vec2));
+  console.log("magnitude", magnitude(vec1), magnitude(vec2));
+  return RAD2DEG * Math.acos(dot(vec1, vec2) / (magnitude(vec1) * magnitude(vec2)));
 }
 
 function signOf(num) {
@@ -605,5 +647,48 @@ AFRAME.registerComponent("camera-gps", {
         gpsTimeInterval: 5,
       });
     }
+  },
+});
+
+AFRAME.registerComponent("sky-background", {
+  init: function () {
+    this.skyRotator = this.el.querySelector("#skyRotator");
+    this.galaxyRoller = this.skyRotator.querySelector("#galaxyRoller");
+    this.skyEl = this.galaxyRoller.querySelector("a-sky");
+    this.tickCount = 0;
+  },
+
+  tick: function () {
+    if (this.tickCount == 0) {
+      this.updateSky();
+    } else if (this.tickCount >= 100) {
+      this.tickCount = 0;
+    } else {
+      this.tickCount++;
+    }
+  },
+
+  // Wir nutzen die Milchstraße um den Himmel richtig zu drehen.
+  updateSky: function () {
+    geoCoordsPromise.then((geoCoords) => {
+      galacticCenterAzAlt = radec2azalt(galacticCenterRaDec, geoCoords.fraunhofer);
+      longitude90AzAlt = radec2azalt(longitude90RaDec, geoCoords.fraunhofer);
+
+      const referenceVec = azalt2xyz({ az: galacticCenterAzAlt.az - 90, alt: 0 }, 1);
+      const longitude90Vec = azalt2xyz(longitude90AzAlt, 1);
+
+      console.log(referenceVec, longitude90Vec);
+
+      const galacticRoll = -angleBetweenVectors(referenceVec, longitude90Vec);
+
+      console.log("galacticRoll", galacticRoll);
+
+      this.galaxyRoller.setAttribute("rotation", { x: galacticRoll, y: 0, z: 0 });
+      this.skyRotator.setAttribute("rotation", {
+        x: 0,
+        y: -galacticCenterAzAlt.az,
+        z: -galacticCenterAzAlt.alt,
+      });
+    });
   },
 });
