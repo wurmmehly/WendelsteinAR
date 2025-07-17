@@ -6,17 +6,6 @@ const pages = [
   { key: "sky", url: "fraunhofer-sim.html" },
 ];
 
-// Hotspot Config
-const hotspotConfig = [
-  { slot: "hotspot-1", pos: "0 5 0", normal: "0 1 0", textKey: "hotspot1" },
-  { slot: "hotspot-2", pos: "2 3 1", normal: "0 1 0", textKey: "hotspot2" },
-  { slot: "hotspot-3", pos: "-2 3 2", normal: "0 1 0", textKey: "hotspot3" },
-  { slot: "hotspot-4", pos: "1 2 -2", normal: "0 1 0", textKey: "hotspot4" },
-];
-
-let hotspotTexts = {};
-let closeText = "Schließen"; // Fallback
-
 function setLanguage(lang) {
   localStorage.setItem("language", lang);
   document.documentElement.lang = lang;
@@ -120,39 +109,7 @@ function updateContent(lang) {
         document.getElementById("consent-btn").textContent =
           t.consent.button || "";
       }
-
-      hotspotTexts = t?.hotspots || {};
-      closeText = t?.close || "Schließen";
-      updateHotspots();
     });
-}
-
-// Hotspots dynamisch erzeugen
-function updateHotspots() {
-  const modelViewer = document.getElementById("model-viewer");
-  if (!modelViewer) return;
-
-  //Hotspots entfernen
-  Array.from(modelViewer.querySelectorAll('button[slot^="hotspot-"]')).forEach(
-    (btn) => btn.remove()
-  );
-
-  //Hotspots erzeugen
-  hotspotConfig.forEach(({ slot, pos, normal, textKey }) => {
-    const btn = document.createElement("button");
-    btn.setAttribute("slot", slot);
-    btn.setAttribute("data-position", pos);
-    btn.setAttribute("data-normal", normal);
-    btn.style =
-      "background: #00883A; border-radius: 50%; width: 32px; height: 32px; border: none; cursor: pointer;";
-    btn.onclick = function () {
-      document.getElementById("hotspot-text").textContent =
-        hotspotTexts[textKey] || "";
-      document.getElementById("hotspot-close").textContent = closeText;
-      document.getElementById("hotspot-popup").style.display = "block";
-    };
-    modelViewer.appendChild(btn);
-  });
 }
 
 // Menu Funktionen
