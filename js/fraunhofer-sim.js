@@ -107,6 +107,7 @@ function capSpeed(delta, max = null) {
   return delta;
 }
 
+// Hält die Rotation in Grad zwischen -180 und 180
 function modulateRotation(degrees) {
   const initiallyNeg = degrees < 0;
 
@@ -149,7 +150,7 @@ function animate(element, property, val, animationOverrides = {}) {
   element.setAttribute(`animation__${property}`, animationProps);
 }
 
-function readMore(object) {
+function openInfoPanel(object) {
   document.querySelector("#fader").setAttribute("visible", true);
 
   infoPanelContainer = document.querySelector("#infoPanelContainer");
@@ -176,6 +177,9 @@ function closeInfoPanel() {
   document.querySelector("#fader").setAttribute("visible", false);
 }
 
+//
+// Lädt die Waypoints, auf die das Teleskop zeigt
+//
 AFRAME.registerComponent("load-sky", {
   init: function () {
     this.primaryMirror = document.querySelector("#primaryMirror");
@@ -201,6 +205,7 @@ AFRAME.registerComponent("load-sky", {
   },
 
   tick: function () {
+    // Rechnet die Az-Alt Koordinaten der Waypoints nur alle 100 Ticks
     if (this.tickCount < 100) {
       this.tickCount++;
     } else {
@@ -209,7 +214,25 @@ AFRAME.registerComponent("load-sky", {
     }
   },
 
+  //
+  // Bewegt die Waypoints zu ihre echte Standorten
+  //
+  updateWaypointsPos: function () {
+    geoCoordsPromise.then((geoCoords) => {
+      skyCoordsPromise.then((skyCoords) => {
+        for (const [objectId, els] of Object.entries(waypoints)) {
+          coords = radec2azalt(skyCoords[objectId], geoCoords.fraunhofer);
+          waypointAzAlt[objectId] = coords;
+          els.azStick.setAttribute("rotation", { x: 0, y: -coords.az, z: 0 });
+          els.altStick.setAttribute("rotation", { x: coords.alt, y: 0, z: 0 });
+        }
+      });
+    });
+  },
+
+  //
   // Erstellt einen Waypoint und fügt ihn zum Himmel hinzu
+  //
   addWaypoint: function (objectId, assets) {
     assets.append(
       createElement("img", {
@@ -275,19 +298,9 @@ AFRAME.registerComponent("load-sky", {
     this.el.append(waypointAzStick);
   },
 
-  updateWaypointsPos: function () {
-    geoCoordsPromise.then((geoCoords) => {
-      skyCoordsPromise.then((skyCoords) => {
-        for (const [objectId, els] of Object.entries(waypoints)) {
-          coords = radec2azalt(skyCoords[objectId], geoCoords.fraunhofer);
-          waypointAzAlt[objectId] = coords;
-          els.azStick.setAttribute("rotation", { x: 0, y: -coords.az, z: 0 });
-          els.altStick.setAttribute("rotation", { x: coords.alt, y: 0, z: 0 });
-        }
-      });
-    });
-  },
-
+  //
+  // Erstellt ein "Info-Hologram", aber es zeigt nun nur den Name des Objekts an
+  //
   createInfoHologram: function (objectId, title) {
     infoHologramEl = createElement("a-entity", {
       id: `${objectId}HologramPanel`,
@@ -305,10 +318,13 @@ AFRAME.registerComponent("load-sky", {
     return infoHologramEl;
   },
 
+  //
+  // Erstellt eine "Weiter-lesen" Taste
+  //
   createReadMoreButton: function (objectId) {
     var readMoreEl = createElement("button", {
       id: "readMore",
-      onclick: `readMore(${objectId})`,
+      onclick: `openInfoPanel(${objectId})`,
     });
     langPromise.then((langDict) => {
       readMoreEl.textContent = langDict.readmore;
@@ -317,6 +333,9 @@ AFRAME.registerComponent("load-sky", {
     return readMoreEl;
   },
 
+  //
+  // Diese Methoden definizieren wie die Waypoints aussehen, abhängig von ob das Teleskop auf die zeigt
+  //
   highlightWaypoint: function (evt) {
     animate(waypoints[evt.target.id].frame, "scale", {
       x: 1.2,
@@ -374,6 +393,10 @@ AFRAME.registerComponent("load-sky", {
   },
 });
 
+//
+// Erlaubt die Kamera das Teleskop zu drehen, wenn die Maus geklickt wird.
+// Soll auf dem <a-camera>-Element sein.
+//
 AFRAME.registerComponent("telescope-control", {
   init: function () {
     this.raycaster = this.el.components["raycaster"];
@@ -388,12 +411,12 @@ AFRAME.registerComponent("telescope-control", {
     this.active = this.wasActive = false;
     this.lockedOnWaypoint = false;
 
-    // activate
+    // activate -- fängt an, das Teleskop manuell zu drehen
     this.el.addEventListener("mousedown", (evt) => {
       this.active = true;
       this.lockedOnWaypoint = false;
     });
-    // deactivate
+    // deactivate -- hört auf, manuell zu drehen
     this.el.addEventListener("mouseup", (evt) => {
       this.active = this.wasActive = false;
       this.closestWaypoint = this.getClosestWaypoint();
@@ -408,31 +431,50 @@ AFRAME.registerComponent("telescope-control", {
     this.currentTelescope = this.getCurrentTelescopeDirection();
     this.currentRay = this.getCurrentRayDirection();
 
+    // Bevor die Elemente geladen werden, ihre Rotationen haben Werte von "NaN" -- an diese Fälle, mach nichts
     if (isNaN(this.currentTelescope.alt) || isNaN(this.currentRay.alt)) return;
 
     if (this.active) {
-      this.controlTelescope();
+      this.controlTelescope(); // manuell drehen
     } else if (this.closestWaypoint && !this.lockedOnWaypoint) {
-      this.moveTelescopeToClosestWaypoint();
+      this.moveTelescopeToClosestWaypoint(); // automatisch drehen
     }
   },
 
-  getCurrentRayDirection: function () {
-    const dirVec = this.raycaster.data.direction;
+  //
+  // Diese Methoden behandeln wie das Teleskop drehen soll
+  //
 
-    return {
-      alt: Math.asin(dirVec.y / (dirVec.x ** 2 + dirVec.y ** 2 + dirVec.z ** 2) ** 0.5) * RAD2DEG,
-      az: Math.atan2(dirVec.x, -dirVec.z) * RAD2DEG,
-    };
+  // Dreht das Teleskop manuell
+  controlTelescope: function () {
+    if (this.wasActive) {
+      this.updateTelescopeAltitude((this.currentRay.alt - this.previousRay.alt) * EASING);
+      this.updateTelescopeAzimuth((this.currentRay.az - this.previousRay.az) * EASING);
+    }
+
+    this.previousRay = this.currentRay;
+    this.wasActive = true;
   },
 
-  getCurrentTelescopeDirection: function () {
-    return {
-      alt: this.fraunhoferTelescopeRig.getAttribute("rotation").x,
-      az: -this.fraunhoferTopPart.getAttribute("rotation").y,
-    };
+  // Dreht das Teleskop automatisch zu den nähesten Waypoint
+  moveTelescopeToClosestWaypoint: function () {
+    deltaAlt = modulateRotation(
+      waypointAzAlt[this.closestWaypoint].alt - this.currentTelescope.alt
+    );
+    deltaAz = modulateRotation(waypointAzAlt[this.closestWaypoint].az - this.currentTelescope.az);
+
+    if (Math.abs(deltaAlt) < TINY_DELTA && Math.abs(deltaAz) < TINY_DELTA) {
+      this.lockedOnWaypoint = true;
+      waypoints[this.closestWaypoint].raycastable.emit("locked-on-waypoint", {}, false);
+    } else {
+      this.updateTelescopeAltitude(deltaAlt, TELESCOPE_NATURAL_SPEED);
+      this.updateTelescopeAzimuth(deltaAz, TELESCOPE_NATURAL_SPEED);
+    }
   },
 
+  //
+  // Diese Methoden behandeln die Bewegungen des Teleskops
+  //
   updateTelescopeAltitude: function (delta, max = null) {
     delta = capSpeed(delta, max);
 
@@ -463,29 +505,26 @@ AFRAME.registerComponent("telescope-control", {
     });
   },
 
-  controlTelescope: function () {
-    if (this.wasActive) {
-      this.updateTelescopeAltitude((this.currentRay.alt - this.previousRay.alt) * EASING);
-      this.updateTelescopeAzimuth((this.currentRay.az - this.previousRay.az) * EASING);
-    }
+  //
+  // Diese Methoden gewinnen Infos wichtig fürs Funktionieren dieser Component
+  //
 
-    this.previousRay = this.currentRay;
-    this.wasActive = true;
+  // gewinnt worauf die Kamera nun zeigt
+  getCurrentRayDirection: function () {
+    const dirVec = this.raycaster.data.direction;
+
+    return {
+      alt: Math.asin(dirVec.y / (dirVec.x ** 2 + dirVec.y ** 2 + dirVec.z ** 2) ** 0.5) * RAD2DEG,
+      az: Math.atan2(dirVec.x, -dirVec.z) * RAD2DEG,
+    };
   },
 
-  moveTelescopeToClosestWaypoint: function () {
-    deltaAlt = modulateRotation(
-      waypointAzAlt[this.closestWaypoint].alt - this.currentTelescope.alt
-    );
-    deltaAz = modulateRotation(waypointAzAlt[this.closestWaypoint].az - this.currentTelescope.az);
-
-    if (Math.abs(deltaAlt) < TINY_DELTA && Math.abs(deltaAz) < TINY_DELTA) {
-      this.lockedOnWaypoint = true;
-      waypoints[this.closestWaypoint].raycastable.emit("locked-on-waypoint", {}, false);
-    } else {
-      this.updateTelescopeAltitude(deltaAlt, TELESCOPE_NATURAL_SPEED);
-      this.updateTelescopeAzimuth(deltaAz, TELESCOPE_NATURAL_SPEED);
-    }
+  // gewinnt worauf das Teleskop nun zeigt
+  getCurrentTelescopeDirection: function () {
+    return {
+      alt: this.fraunhoferTelescopeRig.getAttribute("rotation").x,
+      az: -this.fraunhoferTopPart.getAttribute("rotation").y,
+    };
   },
 
   getClosestWaypoint: function () {
@@ -560,17 +599,20 @@ AFRAME.registerComponent("handle-gps", {
 
       // Setzt das Teleskop an seine richtige Stelle
       setAttributes(telescope, {
-          position: { x: 0, y: alt, z: 0 },
-          "gps-projected-entity-place": { latitude: lat, longitude: lon },
-        });
+        position: { x: 0, y: alt, z: 0 },
+        "gps-projected-entity-place": { latitude: lat, longitude: lon },
+      });
       setAttributes(celestialSphere, {
         position: { x: 0, y: alt + 3.209, z: 0 },
         "gps-projected-entity-place": { latitude: lat, longitude: lon },
       });
-      });
+    });
   },
 });
 
+//
+// Zeigt an, wie Licht zwischen die Spiegel des Teleskops geht
+//
 AFRAME.registerComponent("mirror-rays", {
   schema: {
     number: { type: "number", default: 60 },
@@ -684,14 +726,11 @@ AFRAME.registerComponent("sky-background", {
       galacticCenterAzAlt = radec2azalt(galacticCenterRaDec, geoCoords.fraunhofer);
       longitude90AzAlt = radec2azalt(longitude90RaDec, geoCoords.fraunhofer);
 
+      // Gewinnt Vektoren dafür, wo der Punkt von 90 Grad galaktische Länge nun ist, und wo er sein soll
+      // Der Winkel dazwischen kann benutzt werden, um den Himmel richtig zu orientieren
       const referenceVec = azalt2xyz({ az: galacticCenterAzAlt.az - 90, alt: 0 }, 1);
       const longitude90Vec = azalt2xyz(longitude90AzAlt, 1);
-
-      console.log(referenceVec, longitude90Vec);
-
       const galacticRoll = -angleBetweenVectors(referenceVec, longitude90Vec);
-
-      console.log("galacticRoll", galacticRoll);
 
       this.galaxyRoller.setAttribute("rotation", { x: galacticRoll, y: 0, z: 0 });
       this.skyRotator.setAttribute("rotation", {

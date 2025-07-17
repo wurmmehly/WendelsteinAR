@@ -57,18 +57,6 @@
       <a-plane id="fader" color="#333333" opacity=".5" visible="false" position="0 0 -1e-3"></a-plane>
     </a-camera>
 
-    <a-entity load-sky id="celestialSphere"></a-entity>
-
-    <a-entity id="skyBackground" sky-background rotation="0 -90 0"> <!-- Diese Rotation setzt die Mitte der Galaxie bei den Koordinaten Az=0, Alt=0 -->
-      <!-- Diese "Rotators" drehen den Himmel zu die richtige Position -->
-      <a-entity id="skyRotator">
-          <a-entity id="galaxyRoller">
-            <a-sky src="#opticalSky" visible="false"></a-sky>
-          </a-entity>
-        </a-entity>
-      </a-entity>
-    </a-entity>
-
     <!-- Modell an GPS-Koordinaten -->
     <a-entity id="fraunhoferRig" scale=".1 .1 .1" position="0 0 -10">
       <a-entity id="fraunhoferPedestal" gltf-model="models/fraunhofer/pedestal.glb">
@@ -84,6 +72,18 @@
               <a-entity id="primaryMirror" mirror-rays="start: 0 4000 10.2; length: 4005.4; tilt: 180"></a-entity>
               <a-entity id="secondaryMirror" mirror-rays="start: 0 -5.4 10.2; length: 28.5; tilt: -13.725"></a-entity>
               <a-entity id="tertiaryMirror" mirror-rays="start: 0 22.2 3.5; length: 24; tilt: 184"></a-entity>
+            </a-entity>
+          </a-entity>
+        </a-entity>
+      </a-entity>
+    </a-entity>
+
+    <a-entity load-sky id="celestialSphere" position="0 3.209 -10">
+      <a-entity id="skyBackground" sky-background rotation="0 -90 0"> <!-- Diese Rotation setzt die Mitte der Galaxie bei den Koordinaten Az=0, Alt=0 -->
+        <!-- Diese "Rotators" drehen den Himmel zu die richtige Position -->
+        <a-entity id="skyRotator">
+            <a-entity id="galaxyRoller">
+              <a-sky src="#opticalSky" visible="false"></a-sky>
             </a-entity>
           </a-entity>
         </a-entity>
