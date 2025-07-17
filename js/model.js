@@ -5,10 +5,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   let lang = localStorage.getItem("language") || "de";
 
   const hotspotConfig = [
-    { slot: "hotspot-1", pos: "0 5 0", normal: "0 1 0", textKey: "hotspot1" },
-    { slot: "hotspot-2", pos: "2 3 1", normal: "0 1 0", textKey: "hotspot2" },
-    { slot: "hotspot-3", pos: "-2 3 2", normal: "0 1 0", textKey: "hotspot3" },
-    { slot: "hotspot-4", pos: "1 2 -2", normal: "0 1 0", textKey: "hotspot4" },
+    { slot: "hotspot-1", pos: "0 32 0", normal: "0 1 0", textKey: "hotspot1" },
+    {
+      slot: "hotspot-2",
+      pos: "-6 57 10",
+      normal: "0 1 0",
+      textKey: "hotspot2",
+    },
+    {
+      slot: "hotspot-3",
+      pos: "-18 32 -10",
+      normal: "0 1 0",
+      textKey: "hotspot3",
+    },
+    { slot: "hotspot-4", pos: "1 2 -2", normal: "0 0 0", textKey: "hotspot4" },
   ];
 
   let t = {};
