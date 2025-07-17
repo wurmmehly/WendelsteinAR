@@ -82,9 +82,20 @@ function dot(vec1, vec2) {
 // Benutzt das Punktprodukt, um den Winkel zwischen 2 Vektoren zu rechnen
 // Rückwert in Grad
 function angleBetweenVectors(vec1, vec2) {
-  console.log("dot", dot(vec1, vec2));
-  console.log("magnitude", magnitude(vec1), magnitude(vec2));
   return RAD2DEG * Math.acos(dot(vec1, vec2) / (magnitude(vec1) * magnitude(vec2)));
+}
+
+// Haversine - Entfernung
+function getDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371000;
+  const toRad = (x) => (x * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
 }
 
 function signOf(num) {
@@ -177,28 +188,6 @@ AFRAME.registerComponent("load-sky", {
     this.closeHologramPanel = this.closeHologramPanel.bind(this);
 
     this.tickCount = 0;
-
-    if (locationName) {
-      geoCoordsPromise.then((geoCoords) => {
-        setAttributes(this.el, {
-          position: {
-            x: 0,
-            y: geoCoords.fraunhofer.altitude + 3.209,
-            z: 0,
-          },
-          "gps-projected-entity-place": {
-            latitude: geoCoords.fraunhofer.latitude,
-            longitude: geoCoords.fraunhofer.longitude,
-          },
-        });
-      });
-    } else {
-      this.el.setAttribute("position", {
-        x: 0,
-        y: 3.209,
-        z: -10,
-      });
-    }
 
     skyCoordsPromise.then((skyCoords) => {
       const assets = document.querySelector("a-assets");
@@ -413,10 +402,6 @@ AFRAME.registerComponent("telescope-control", {
     this.el.addEventListener("skyloaded", (evt) => {
       this.closestWaypoint = this.getClosestWaypoint();
     });
-
-    if (locationName) {
-      this.fraunhoferRig.setAttribute("telescope-gps", "");
-    }
   },
 
   tick: function () {
@@ -525,21 +510,63 @@ AFRAME.registerComponent("telescope-control", {
   },
 });
 
-AFRAME.registerComponent("telescope-gps", {
-  schema: { type: "string", default: "fraunhofer" },
-
+AFRAME.registerComponent("handle-gps", {
   init: function () {
-    fetch("resources/geoCoords.json")
-      .then((response) => response.json())
-      .then((geoCoords) => {
-        alt = geoCoords[this.data].altitude;
-        lat = geoCoords[this.data].latitude;
-        lon = geoCoords[this.data].longitude;
+    telescope = this.el.querySelector("#fraunhoferRig");
+    celestialSphere = this.el.querySelector("#celestialSphere");
+    camera = this.el.querySelector("a-camera");
 
-        setAttributes(this.el, {
+    if (!locationName) {
+    }
+
+    var gpsAvailable;
+    var currentPos;
+    navigator.geolocation.getCurrentPosition(
+      (success) => {
+        gpsAvailable = true;
+        currentPos = success;
+      },
+      (failure) => {
+        gpsAvailable = false;
+      }
+    );
+
+    geoCoordsPromise.then((geoCoords) => {
+      alt = geoCoords.fraunhofer.altitude;
+      lat = geoCoords.fraunhofer.latitude;
+      lon = geoCoords.fraunhofer.longitude;
+
+      if (currentPos) {
+        distance = getDistance(lat, lon, currentPos.latitude, currentPos.longitude);
+      }
+      boundary = 5;
+
+      // wenn kein Ort definiziert wird und der Benutzer ist zu weit vom Fraunhofer, benutzt keine GPS-Koordinaten
+      if (!locationName && (!gpsAvailable || (gpsAvailable && distance > boundary))) {
+        return;
+      }
+
+      // wenn GPS-Koordinaten verfügbar sind und der Benutzer nah vom Fraunhofer ist, benutzt echte Koordinaten
+      if (gpsAvailable && distance < boundary) {
+        camera.setAttribute("gps-projected-camera");
+      } else {
+        // andersweise, wenn GPS nicht verfügbar ist oder der Benutzer ist zu weit vom Fraunhofer, benutzt falsche Koordinaten für die Kamera
+        camera.setAttribute("gps-projected-camera", {
+          simulateAltitude: geoCoords[locationName].altitude,
+          simulateLatitude: geoCoords[locationName].latitude,
+          simulateLongitude: geoCoords[locationName].longitude,
+        });
+      }
+
+      // Setzt das Teleskop an seine richtige Stelle
+      setAttributes(telescope, {
           position: { x: 0, y: alt, z: 0 },
           "gps-projected-entity-place": { latitude: lat, longitude: lon },
         });
+      setAttributes(celestialSphere, {
+        position: { x: 0, y: alt + 3.209, z: 0 },
+        "gps-projected-entity-place": { latitude: lat, longitude: lon },
+      });
       });
   },
 });
@@ -629,23 +656,6 @@ AFRAME.registerComponent("mirror-rays", {
         },
       });
       ray.after(rayHighlight);
-    }
-  },
-});
-
-AFRAME.registerComponent("camera-gps", {
-  init: function () {
-    if (locationName) {
-      setAttributes(this.el, {
-        simulateLatitude: location.latitude,
-        simulateLongitude: location.longitude,
-        simulateAltitude: location.altitude,
-      });
-    } else {
-      this.el.setAttribute("gps-projected-camera", {
-        gpsMinDistance: 15,
-        gpsTimeInterval: 5,
-      });
     }
   },
 });
