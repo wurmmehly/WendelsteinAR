@@ -2,10 +2,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const mv = document.getElementById("model-viewer");
   if (!mv) return;
 
-  // Sprache wie von deiner Website
   let lang = localStorage.getItem("language") || "de";
 
-  // Hotspot-Konfiguration: falls du hier (z.B. für andere Modelle) was änderst
   const hotspotConfig = [
     { slot: "hotspot-1", pos: "0 5 0", normal: "0 1 0", textKey: "hotspot1" },
     { slot: "hotspot-2", pos: "2 3 1", normal: "0 1 0", textKey: "hotspot2" },
@@ -13,7 +11,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     { slot: "hotspot-4", pos: "1 2 -2", normal: "0 1 0", textKey: "hotspot4" },
   ];
 
-  // Sprachdatei holen (wird ggf. auch in script.js geholt – kann man mehrfach machen!)
   let t = {};
   try {
     const resp = await fetch(`lang/${lang}.json?cb=${Date.now()}`);
@@ -22,16 +19,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.warn("Sprachdatei konnte nicht geladen werden:", e);
   }
 
-  // Hotspot-Texte rausziehen
   const hotspotTexts = t.hotspots || {};
   const closeText = t.close || "Schließen";
 
-  // Hotspot-Buttons entfernen (falls reload etc.)
   Array.from(mv.querySelectorAll('button[slot^="hotspot-"]')).forEach((btn) =>
     btn.remove()
   );
 
-  // Hotspot-Buttons einfügen
   hotspotConfig.forEach(({ slot, pos, normal, textKey }) => {
     const btn = document.createElement("button");
     btn.setAttribute("slot", slot);
